@@ -1,5 +1,5 @@
 /**
- * Map Explorer - Scroll-driven map animation with video playback
+ * Map Explorer - Scroll-based step navigation
  */
 
 (function() {
@@ -12,20 +12,23 @@
   const locationTitle = document.querySelector('.location-title');
   const locationDescription = document.querySelector('.location-description');
   const playVideoBtn = document.querySelector('.play-video-btn');
-  const scrollProgress = document.querySelector('.scroll-progress');
-  const scrollHint = document.querySelector('.scroll-hint');
   const videoModal = document.querySelector('.video-modal');
   const videoPlayer = document.querySelector('.video-player');
   const closeModalBtn = document.querySelector('.close-modal');
+  const currentLocationSpan = document.querySelector('.current-location');
+  const totalLocationsSpan = document.querySelector('.total-locations');
 
   // State
   let locations = [];
-  let currentLocationIndex = -1;
-  let visibleIcons = new Set();
+  let currentLocationIndex = -1; // -1 = intro view (full map)
+  let maxVisitedIndex = -1; // Track the furthest location visited
+  let isTransitioning = false;
+  let scrollAccumulator = 0;
+  const SCROLL_THRESHOLD = 50; // Amount of scroll needed to trigger navigation
 
   // Configuration
   const ZOOM_SCALE = 2.5;
-  const SECTIONS = 5; // intro + 3 locations + outro
+  const TRANSITION_DURATION = 800; // ms
 
   /**
    * Load location data from JSON
@@ -35,7 +38,9 @@
       const response = await fetch('data/locations.json');
       const data = await response.json();
       locations = data.locations;
+      totalLocationsSpan.textContent = locations.length;
       createIcons();
+      updateCounter();
     } catch (error) {
       console.error('Failed to load locations:', error);
     }
@@ -86,215 +91,42 @@
   }
 
   /**
-   * Interpolate between two values
+   * Show a specific icon with entrance animation
    */
-  function lerp(start, end, progress) {
-    return start + (end - start) * progress;
-  }
-
-  /**
-   * Ease in-out function for smoother transitions
-   */
-  function easeInOutCubic(t) {
-    return t < 0.5 
-      ? 4 * t * t * t 
-      : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
-
-  /**
-   * Update UI based on scroll position
-   */
-  function updateOnScroll() {
-    const scrollY = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = scrollY / maxScroll;
-    
-    // Update scroll progress indicator
-    scrollProgress.style.height = `${scrollPercent * 100}%`;
-    
-    // Hide scroll hint after initial scroll
-    if (scrollPercent > 0.02) {
-      scrollHint.classList.add('hidden');
-    } else {
-      scrollHint.classList.remove('hidden');
-    }
-    
-    // Calculate which section we're in (0 to SECTIONS-1)
-    const sectionProgress = scrollPercent * (SECTIONS - 1);
-    const currentSection = Math.floor(sectionProgress);
-    const sectionLocalProgress = sectionProgress - currentSection;
-    
-    // Apply easing to local progress
-    const easedProgress = easeInOutCubic(sectionLocalProgress);
-    
-    // Handle different sections
-    if (currentSection === 0) {
-      // Intro section: zoom from full view to first location
-      handleIntroSection(easedProgress);
-    } else if (currentSection >= 1 && currentSection <= locations.length) {
-      // Location sections - show one location at a time
-      handleLocationSection(currentSection - 1, easedProgress);
-    } else if (currentSection >= locations.length + 1) {
-      // Outro section: zoom back to full view
-      handleOutroSection(easedProgress);
-    }
-  }
-
-  /**
-   * Handle intro section animation
-   */
-  function handleIntroSection(progress) {
-    if (locations.length === 0) return;
-    
-    const targetLocation = locations[0];
-    const targetTransform = calculateTransform(targetLocation.position, ZOOM_SCALE);
-    
-    const transform = {
-      scale: lerp(1, targetTransform.scale, progress),
-      translateX: lerp(0, targetTransform.translateX, progress),
-      translateY: lerp(0, targetTransform.translateY, progress)
-    };
-    
-    applyMapTransform(transform);
-    
-    // Show first location info and icon when progress > 0.6
-    if (progress > 0.6) {
-      setActiveLocation(0);
-      showIcon(0);
-    } else {
-      hideInfoOverlay();
-    }
-  }
-
-  /**
-   * Handle location section animations - each location gets its own section
-   */
-  function handleLocationSection(locationIndex, progress) {
-    if (locationIndex >= locations.length) return;
-    
-    const currentLocation = locations[locationIndex];
-    const currentTransform = calculateTransform(currentLocation.position, ZOOM_SCALE);
-    
-    // Stay zoomed on current location
-    applyMapTransform(currentTransform);
-    
-    // Show current location throughout its section
-    setActiveLocation(locationIndex);
-    
-    // Show icon for current location (with entrance animation at start)
-    if (progress > 0.1) {
-      showIcon(locationIndex);
-    }
-    
-    // Also keep all previous location icons visible
-    for (let i = 0; i < locationIndex; i++) {
-      showIcon(i);
-    }
-    
-    // If transitioning to next location (progress > 0.7), start panning
-    if (progress > 0.7 && locationIndex < locations.length - 1) {
-      const nextLocation = locations[locationIndex + 1];
-      const nextTransform = calculateTransform(nextLocation.position, ZOOM_SCALE);
+  function showIcon(index, withAnimation = true) {
+    const icon = iconsContainer.querySelector(`[data-id="${locations[index].id}"]`);
+    if (icon) {
+      icon.classList.add('visible');
       
-      // Map progress 0.7-1.0 to 0.0-1.0 for smooth pan transition
-      const panProgress = (progress - 0.7) / 0.3;
-      const easedPanProgress = easeInOutCubic(panProgress);
-      
-      const transform = {
-        scale: ZOOM_SCALE,
-        translateX: lerp(currentTransform.translateX, nextTransform.translateX, easedPanProgress),
-        translateY: lerp(currentTransform.translateY, nextTransform.translateY, easedPanProgress)
-      };
-      
-      applyMapTransform(transform);
-      
-      // Start hiding current location info when panning starts
-      if (panProgress > 0.3) {
-        hideInfoOverlay();
+      if (withAnimation && !icon.classList.contains('has-entered')) {
+        icon.classList.add('entering');
+        icon.classList.add('has-entered');
+        
+        // Remove entrance animation class after it completes
+        setTimeout(() => {
+          icon.classList.remove('entering');
+        }, 800);
       }
     }
   }
 
   /**
-   * Handle outro section animation
+   * Hide a specific icon
    */
-  function handleOutroSection(progress) {
-    if (locations.length === 0) return;
-    
-    const lastLocation = locations[locations.length - 1];
-    const lastTransform = calculateTransform(lastLocation.position, ZOOM_SCALE);
-    
-    const transform = {
-      scale: lerp(ZOOM_SCALE, 1, progress),
-      translateX: lerp(lastTransform.translateX, 0, progress),
-      translateY: lerp(lastTransform.translateY, 0, progress)
-    };
-    
-    applyMapTransform(transform);
-    hideInfoOverlay();
-    
-    // Keep all icons visible
-    locations.forEach((_, index) => {
-      showIcon(index);
-    });
-  }
-
-  /**
-   * Set active location and update UI
-   */
-  function setActiveLocation(index) {
-    if (index < 0 || index >= locations.length) return;
-    
-    const location = locations[index];
-    
-    // Update info overlay content
-    locationTitle.textContent = location.title;
-    locationDescription.textContent = location.description;
-    
-    // Store current video URL for play button
-    playVideoBtn.dataset.video = location.video;
-    
-    // Show info overlay
-    infoOverlay.classList.add('active');
-    
-    // Show and activate icon
-    showIcon(index);
-    setActiveIcon(index);
-    
-    // Also show all previously visited icons
-    for (let i = 0; i < index; i++) {
-      showIcon(i);
-    }
-    
-    currentLocationIndex = index;
-  }
-
-  /**
-   * Hide info overlay
-   */
-  function hideInfoOverlay() {
-    infoOverlay.classList.remove('active');
-    clearActiveIcons();
-  }
-
-  /**
-   * Show a specific icon
-   */
-  function showIcon(index) {
+  function hideIcon(index) {
     const icon = iconsContainer.querySelector(`[data-id="${locations[index].id}"]`);
-    if (icon && !visibleIcons.has(index)) {
-      // Add entrance animation for first appearance
-      icon.classList.add('visible', 'entering');
-      visibleIcons.add(index);
-      
-      // Remove entrance animation class after it completes
-      setTimeout(() => {
-        icon.classList.remove('entering');
-      }, 800);
-    } else if (icon) {
-      // Already visible, just ensure class is there
-      icon.classList.add('visible');
+    if (icon) {
+      icon.classList.remove('visible', 'active');
     }
+  }
+
+  /**
+   * Hide all icons
+   */
+  function hideAllIcons() {
+    document.querySelectorAll('.location-icon').forEach(icon => {
+      icon.classList.remove('visible', 'active');
+    });
   }
 
   /**
@@ -315,6 +147,202 @@
     document.querySelectorAll('.location-icon.active').forEach(icon => {
       icon.classList.remove('active');
     });
+  }
+
+  /**
+   * Navigate to a specific location
+   */
+  function goToLocation(index) {
+    if (isTransitioning) return;
+    
+    // Validate index bounds
+    if (index < -1 || index >= locations.length) return;
+
+    isTransitioning = true;
+
+    // Update current location
+    currentLocationIndex = index;
+
+    // Update max visited index
+    if (index > maxVisitedIndex) {
+      maxVisitedIndex = index;
+    }
+
+    // If index is -1, show full map view with all visited icons
+    if (index === -1) {
+      applyMapTransform({ scale: 1, translateX: 0, translateY: 0 });
+      hideInfoOverlay();
+      clearActiveIcons();
+      
+      // Show all visited location icons
+      hideAllIcons();
+      for (let i = 0; i <= maxVisitedIndex; i++) {
+        showIcon(i, false);
+      }
+      
+      updateCounter();
+      setTimeout(() => {
+        isTransitioning = false;
+      }, TRANSITION_DURATION);
+      return;
+    }
+
+    // Calculate and apply transform for specific location
+    const location = locations[index];
+    const transform = calculateTransform(location.position, ZOOM_SCALE);
+    applyMapTransform(transform);
+
+    // Hide all icons first, then show only current one
+    hideAllIcons();
+    showIcon(index, true);
+    setActiveIcon(index);
+
+    // Update info overlay
+    setTimeout(() => {
+      locationTitle.textContent = location.title;
+      locationDescription.textContent = location.description;
+      playVideoBtn.dataset.video = location.video;
+      infoOverlay.classList.add('active');
+      isTransitioning = false;
+    }, TRANSITION_DURATION / 2);
+
+    updateCounter();
+  }
+
+  /**
+   * Hide info overlay
+   */
+  function hideInfoOverlay() {
+    infoOverlay.classList.remove('active');
+  }
+
+  /**
+   * Update location counter display
+   */
+  function updateCounter() {
+    currentLocationSpan.textContent = Math.max(0, currentLocationIndex + 1);
+  }
+
+  /**
+   * Navigate to next location
+   */
+  function goToNext() {
+    // If at last location, go back to full map view
+    if (currentLocationIndex === locations.length - 1) {
+      goToLocation(-1);
+    } else if (currentLocationIndex < locations.length - 1) {
+      goToLocation(currentLocationIndex + 1);
+    }
+  }
+
+  /**
+   * Navigate to previous location
+   */
+  function goToPrevious() {
+    if (currentLocationIndex > -1) {
+      goToLocation(currentLocationIndex - 1);
+    }
+  }
+
+  /**
+   * Handle wheel/scroll event for navigation
+   */
+  function handleScroll(event) {
+    // Don't navigate while video modal is open
+    if (videoModal.classList.contains('active')) {
+      return;
+    }
+
+    // Prevent default scrolling
+    event.preventDefault();
+
+    // Don't accumulate scroll during transitions
+    if (isTransitioning) {
+      scrollAccumulator = 0;
+      return;
+    }
+
+    // Get scroll delta (normalized across different browsers/devices)
+    let delta = 0;
+    if (event.deltaY) {
+      delta = event.deltaY;
+    } else if (event.wheelDelta) {
+      delta = -event.wheelDelta;
+    } else if (event.detail) {
+      delta = event.detail * 40;
+    }
+
+    // Accumulate scroll delta
+    scrollAccumulator += delta;
+
+    // Check if we've reached the threshold
+    if (Math.abs(scrollAccumulator) >= SCROLL_THRESHOLD) {
+      if (scrollAccumulator > 0) {
+        // Scrolling down = next location
+        goToNext();
+      } else {
+        // Scrolling up = previous location
+        goToPrevious();
+      }
+      
+      // Reset accumulator
+      scrollAccumulator = 0;
+    }
+  }
+
+  /**
+   * Handle touch events for mobile swipe
+   */
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  function handleTouchStart(event) {
+    // Don't handle touches on the info overlay or video button
+    if (event.target.closest('.info-overlay') || event.target.closest('.play-video-btn')) {
+      return;
+    }
+    touchStartY = event.touches[0].clientY;
+  }
+
+  function handleTouchMove(event) {
+    // Don't handle touches on the info overlay
+    if (event.target.closest('.info-overlay')) {
+      return;
+    }
+    touchEndY = event.touches[0].clientY;
+  }
+
+  function handleTouchEnd(event) {
+    // Don't handle touches on the info overlay or video button
+    if (event.target.closest('.info-overlay') || event.target.closest('.play-video-btn')) {
+      touchStartY = 0;
+      touchEndY = 0;
+      return;
+    }
+
+    // Don't navigate while video modal is open
+    if (videoModal.classList.contains('active')) {
+      return;
+    }
+
+    if (isTransitioning) return;
+
+    const deltaY = touchStartY - touchEndY;
+    const threshold = 50;
+
+    if (Math.abs(deltaY) > threshold) {
+      if (deltaY > 0) {
+        // Swiped up = next location
+        goToNext();
+      } else {
+        // Swiped down = previous location
+        goToPrevious();
+      }
+    }
+
+    // Reset touch positions
+    touchStartY = 0;
+    touchEndY = 0;
   }
 
   /**
@@ -340,20 +368,17 @@
    * Initialize event listeners
    */
   function initEventListeners() {
-    // Scroll handler with throttling
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          updateOnScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
+    // Wheel event for desktop scroll
+    window.addEventListener('wheel', handleScroll, { passive: false });
 
-    // Play video button
-    playVideoBtn.addEventListener('click', () => {
+    // Touch events for mobile swipe
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    // Play video button - prevent event from bubbling to touch handlers
+    playVideoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const videoUrl = playVideoBtn.dataset.video;
       if (videoUrl) {
         showVideoModal(videoUrl);
@@ -368,10 +393,23 @@
       }
     });
 
-    // Keyboard handler for modal
+    // Keyboard navigation
     document.addEventListener('keydown', (e) => {
+      // Close modal with Escape
       if (e.key === 'Escape' && videoModal.classList.contains('active')) {
         hideVideoModal();
+        return;
+      }
+
+      // Navigate with arrow keys (when modal is not open)
+      if (!videoModal.classList.contains('active') && !isTransitioning) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          goToNext();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          goToPrevious();
+        }
       }
     });
   }
@@ -382,7 +420,8 @@
   function init() {
     loadLocations().then(() => {
       initEventListeners();
-      updateOnScroll(); // Initial state
+      // Start at intro view (full map)
+      goToLocation(-1);
     });
   }
 

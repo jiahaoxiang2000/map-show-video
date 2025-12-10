@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Scroll container - creates scrollable area -->
-  <div class="scroll-container">
+  <!-- Container for the map explorer -->
+  <div class="map-container">
     <!-- Fixed map layer -->
     <div class="map-wrapper">
       <img class="map-image" src="assets/map.svg" alt="Interactive Map">
@@ -30,15 +30,9 @@
       </div>
     </div>
     
-    <!-- Scroll progress indicator -->
-    <div class="scroll-indicator">
-      <div class="scroll-progress"></div>
-    </div>
-    
-    <!-- Scroll hint (shown initially) -->
-    <div class="scroll-hint">
-      <span>Scroll to explore</span>
-      <div class="scroll-arrow"></div>
+    <!-- Location counter -->
+    <div class="location-counter">
+      <span class="current-location">0</span> / <span class="total-locations">3</span>
     </div>
   </div>
   
