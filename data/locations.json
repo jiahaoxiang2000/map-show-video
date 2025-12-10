@@ -1,0 +1,25 @@
+{
+  "locations": [
+    {
+      "id": 1,
+      "title": "Mountain Peak",
+      "description": "A stunning viewpoint at the highest elevation. Experience breathtaking panoramic views of the surrounding landscape.",
+      "position": { "x": 25, "y": 30 },
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
+    },
+    {
+      "id": 2,
+      "title": "Crystal Lake",
+      "description": "A pristine alpine lake with crystal clear waters. Perfect spot for relaxation and nature photography.",
+      "position": { "x": 70, "y": 45 },
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
+    },
+    {
+      "id": 3,
+      "title": "Ancient Forest",
+      "description": "Walk through centuries-old trees in this magical forest. Home to diverse wildlife and rare plant species.",
+      "position": { "x": 45, "y": 75 },
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
+    }
+  ]
+}

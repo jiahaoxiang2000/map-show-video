@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Map Explorer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Scroll container - creates scrollable area -->
+  <div class="scroll-container">
+    <!-- Fixed map layer -->
+    <div class="map-wrapper">
+      <img class="map-image" src="assets/map.svg" alt="Interactive Map">
+      
+      <!-- Location icons container -->
+      <div class="icons-container"></div>
+    </div>
+    
+    <!-- Bottom sheet overlay for location info -->
+    <div class="info-overlay">
+      <div class="info-handle"></div>
+      <div class="info-content">
+        <h2 class="location-title"></h2>
+        <p class="location-description"></p>
+        <button class="play-video-btn">
+          <span class="play-icon"></span>
+          Watch Video
+        </button>
+      </div>
+    </div>
+    
+    <!-- Scroll progress indicator -->
+    <div class="scroll-indicator">
+      <div class="scroll-progress"></div>
+    </div>
+    
+    <!-- Scroll hint (shown initially) -->
+    <div class="scroll-hint">
+      <span>Scroll to explore</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+  
+  <!-- Video modal -->
+  <div class="video-modal">
+    <div class="video-modal-content">
+      <button class="close-modal">&times;</button>
+      <video class="video-player" controls playsinline>
+        <source src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+  
+  <script src="main.js"></script>
+</body>
+</html>

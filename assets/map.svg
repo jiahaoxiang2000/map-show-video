@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="100%" style="stop-color:#E0F6FF"/>
+    </linearGradient>
+    <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90D9"/>
+      <stop offset="100%" style="stop-color:#2E5A88"/>
+    </linearGradient>
+    <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B9DC3"/>
+      <stop offset="100%" style="stop-color:#6B7AA1"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="1000" fill="url(#skyGradient)"/>
+  
+  <!-- Distant mountains -->
+  <path d="M0 300 L150 180 L300 280 L450 150 L600 250 L750 170 L800 280 L800 400 L0 400 Z" fill="#B8C5D6" opacity="0.7"/>
+  
+  <!-- Main mountain (position 1 area - top left) -->
+  <path d="M50 450 L200 200 L350 450 Z" fill="url(#mountainGradient)"/>
+  <path d="M200 200 L230 250 L200 250 Z" fill="white" opacity="0.8"/>
+  <path d="M150 350 L200 280 L250 350 Z" fill="white" opacity="0.5"/>
+  
+  <!-- Hills and forest area -->
+  <ellipse cx="400" cy="850" rx="300" ry="100" fill="#2D5A27"/>
+  <ellipse cx="200" cy="800" rx="150" ry="60" fill="#3D7A37"/>
+  <ellipse cx="600" cy="820" rx="180" ry="70" fill="#3D7A37"/>
+  
+  <!-- Trees (position 3 area - bottom center) -->
+  <g fill="#1D4A17">
+    <path d="M320 780 L340 720 L360 780 Z"/>
+    <path d="M380 770 L400 700 L420 770 Z"/>
+    <path d="M440 780 L460 720 L480 780 Z"/>
+    <path d="M350 800 L370 740 L390 800 Z"/>
+    <path d="M410 800 L430 740 L450 800 Z"/>
+  </g>
+  <g fill="#2D6A27">
+    <path d="M300 800 L320 750 L340 800 Z"/>
+    <path d="M460 790 L480 730 L500 790 Z"/>
+  </g>
+  
+  <!-- Lake (position 2 area - right center) -->
+  <ellipse cx="580" cy="480" rx="120" ry="80" fill="url(#waterGradient)"/>
+  <ellipse cx="580" cy="460" rx="80" ry="40" fill="#5BA0E9" opacity="0.5"/>
+  
+  <!-- Small islands in lake -->
+  <ellipse cx="620" cy="500" rx="15" ry="8" fill="#4A7A44"/>
+  
+  <!-- Paths/trails -->
+  <path d="M200 450 Q300 500 400 480 Q500 460 560 400" stroke="#C4A35A" stroke-width="4" fill="none" stroke-dasharray="10,5"/>
+  <path d="M400 480 Q380 600 400 750" stroke="#C4A35A" stroke-width="4" fill="none" stroke-dasharray="10,5"/>
+  
+  <!-- Clouds -->
+  <g fill="white" opacity="0.8">
+    <ellipse cx="100" cy="80" rx="50" ry="25"/>
+    <ellipse cx="140" cy="80" rx="40" ry="20"/>
+    <ellipse cx="60" cy="85" rx="35" ry="18"/>
+  </g>
+  <g fill="white" opacity="0.6">
+    <ellipse cx="650" cy="100" rx="60" ry="30"/>
+    <ellipse cx="700" cy="95" rx="45" ry="22"/>
+    <ellipse cx="600" cy="105" rx="40" ry="20"/>
+  </g>
+  
+  <!-- Small details -->
+  <circle cx="150" cy="600" r="8" fill="#5A8A54"/>
+  <circle cx="700" cy="650" r="10" fill="#5A8A54"/>
+  <circle cx="100" cy="700" r="6" fill="#4A7A44"/>
+</svg>
