@@ -2,22 +2,22 @@
   "locations": [
     {
       "id": 1,
-      "title": "Mountain Peak",
-      "description": "A stunning viewpoint at the highest elevation. Experience breathtaking panoramic views of the surrounding landscape.",
+      "title": "山峰",
+      "description": "最高海拔处令人惊叹的观景点。体验周围景观的壮丽全景。",
       "position": { "x": 25, "y": 30 },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 2,
-      "title": "Crystal Lake",
-      "description": "A pristine alpine lake with crystal clear waters. Perfect spot for relaxation and nature photography.",
+      "title": "水晶湖",
+      "description": "一片纯净的高山湖泊，湖水清澈见底。是放松身心和自然摄影的完美地点。",
       "position": { "x": 70, "y": 45 },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 3,
-      "title": "Ancient Forest",
-      "description": "Walk through centuries-old trees in this magical forest. Home to diverse wildlife and rare plant species.",
+      "title": "古老森林",
+      "description": "漫步在这片神奇森林中的百年古树之间。这里是多种野生动物和稀有植物的家园。",
       "position": { "x": 45, "y": 75 },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     }
