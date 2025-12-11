@@ -59,6 +59,9 @@ html, body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  transform-origin: center center;
+  transition: transform 0.8s var(--transition-smooth);
+  will-change: transform;
 }
 
 /* Location icon markers */
@@ -160,8 +163,8 @@ html, body {
   transform: translateY(100%);
   transition: transform 0.5s var(--transition-smooth);
   z-index: 100;
-  max-height: 60vh;
-  overflow: hidden;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .info-overlay.active {
@@ -191,52 +194,32 @@ html, body {
   font-size: 1rem;
   line-height: 1.6;
   color: var(--text-secondary);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
-/* Play video button */
-.play-video-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+/* Video container */
+.video-container {
   width: 100%;
-  padding: 16px 24px;
-  background: var(--primary-color);
-  color: white;
-  border: none;
+  margin-top: 16px;
+}
+
+.video-player {
+  width: 100%;
   border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.play-video-btn:hover {
-  background: var(--primary-dark);
-}
-
-.play-video-btn:active {
-  transform: scale(0.98);
-}
-
-.play-icon {
-  width: 0;
-  height: 0;
-  border-left: 12px solid white;
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
+  background: black;
+  max-height: 40vh;
 }
 
 /* Location counter */
 .location-counter {
   position: fixed;
   top: 24px;
-  right: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
-  z-index: 150;
+  z-index: 200;
   background: rgba(0, 0, 0, 0.4);
   padding: 8px 16px;
   border-radius: 20px;
@@ -244,62 +227,7 @@ html, body {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Video modal */
-.video-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
 
-.video-modal.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.video-modal-content {
-  position: relative;
-  width: 100%;
-  max-width: 800px;
-  padding: 20px;
-}
-
-.video-player {
-  width: 100%;
-  border-radius: 12px;
-  background: black;
-}
-
-.close-modal {
-  position: absolute;
-  top: -10px;
-  right: 10px;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 50%;
-  color: white;
-  font-size: 28px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s ease;
-}
-
-.close-modal:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 /* Desktop adjustments */
 @media (min-width: 768px) {
@@ -327,6 +255,9 @@ html, body {
   .location-counter {
     font-size: 1rem;
     top: 32px;
-    right: 32px;
+  }
+  
+  .video-player {
+    max-height: 50vh;
   }
 }

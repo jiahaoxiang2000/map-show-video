@@ -23,27 +23,18 @@
       <div class="info-content">
         <h2 class="location-title"></h2>
         <p class="location-description"></p>
-        <button class="play-video-btn">
-          <span class="play-icon"></span>
-          观看视频
-        </button>
+        <div class="video-container">
+          <video class="video-player" playsinline>
+            <source src="" type="video/mp4">
+            您的浏览器不支持视频播放。
+          </video>
+        </div>
       </div>
     </div>
     
     <!-- Location counter -->
     <div class="location-counter">
       <span class="current-location">0</span> / <span class="total-locations">3</span>
-    </div>
-  </div>
-  
-  <!-- Video modal -->
-  <div class="video-modal">
-    <div class="video-modal-content">
-      <button class="close-modal">&times;</button>
-      <video class="video-player" controls playsinline>
-        <source src="" type="video/mp4">
-        您的浏览器不支持视频播放。
-      </video>
     </div>
   </div>
   
