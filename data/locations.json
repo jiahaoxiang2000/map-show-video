@@ -1,24 +1,38 @@
 {
+  "mapConfig": {
+    "center": [27.91442, 112.52503],
+    "initialZoom": 13,
+    "focusZoom": 16
+  },
   "locations": [
     {
       "id": 1,
       "title": "山峰",
       "description": "最高海拔处令人惊叹的观景点。体验周围景观的壮丽全景。",
-      "position": { "x": 25, "y": 30 },
+      "coordinates": {
+        "lat": 27.92442,
+        "lng": 112.51503
+      },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 2,
       "title": "水晶湖",
-      "description": "一片纯净的高山湖泊，湖水清澈见底。是放松身心和自然摄影的完美地点。",
-      "position": { "x": 70, "y": 45 },
+      "description": "一片纯净的高山湖泊,湖水清澈见底。是放松身心和自然摄影的完美地点。",
+      "coordinates": {
+        "lat": 27.91442,
+        "lng": 112.53503
+      },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 3,
       "title": "古老森林",
       "description": "漫步在这片神奇森林中的百年古树之间。这里是多种野生动物和稀有植物的家园。",
-      "position": { "x": 45, "y": 75 },
+      "coordinates": {
+        "lat": 27.90442,
+        "lng": 112.52503
+      },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     }
   ]

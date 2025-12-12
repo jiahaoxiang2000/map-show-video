@@ -1,13 +1,11 @@
 /**
- * Map Explorer - Scroll-based step navigation
+ * Map Explorer - Click-based navigation with real map data
  */
 
 (function () {
   "use strict";
 
   // DOM Elements
-  const mapImage = document.querySelector(".map-image");
-  const iconsContainer = document.querySelector(".icons-container");
   const infoOverlay = document.querySelector(".info-overlay");
   const locationTitle = document.querySelector(".location-title");
   const locationDescription = document.querySelector(".location-description");
@@ -16,16 +14,37 @@
   const totalLocationsSpan = document.querySelector(".total-locations");
 
   // State
+  let map = null;
+  let mapConfig = {};
   let locations = [];
-  let currentLocationIndex = -1; // -1 = intro view (full map)
-  let maxVisitedIndex = -1; // Track the furthest location visited
-  let isTransitioning = false;
-  let scrollAccumulator = 0;
-  const SCROLL_THRESHOLD = 50; // Amount of scroll needed to trigger navigation
+  let markers = [];
+  let travelPath = null;
+  let currentLocationIndex = -1; // -1 = no location selected
 
-  // Configuration
-  const ZOOM_SCALE = 1;
-  const TRANSITION_DURATION = 800; // ms
+  /**
+   * Initialize Leaflet map
+   */
+  function initMap() {
+    // Create map with OpenStreetMap tiles
+    map = L.map("map", {
+      center: mapConfig.center,
+      zoom: mapConfig.initialZoom,
+      zoomControl: true,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      dragging: true,
+      touchZoom: true,
+      keyboard: true,
+      attributionControl: true,
+    });
+
+    // Use OpenStreetMap tiles
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(map);
+  }
 
   /**
    * Load location data from JSON
@@ -34,9 +53,11 @@
     try {
       const response = await fetch("data/locations.json");
       const data = await response.json();
+      mapConfig = data.mapConfig;
       locations = data.locations;
       totalLocationsSpan.textContent = locations.length;
-      createIcons();
+      initMap();
+      createMarkers();
       updateCounter();
     } catch (error) {
       console.error("Failed to load locations:", error);
@@ -44,185 +65,149 @@
   }
 
   /**
-   * Create icon elements for each location
+   * Create custom icon for markers
    */
-  function createIcons() {
-    locations.forEach((location) => {
-      const icon = document.createElement("div");
-      icon.className = "location-icon";
-      icon.dataset.id = location.id;
-      icon.style.left = `${location.position.x}%`;
-      icon.style.top = `${location.position.y}%`;
-
-      iconsContainer.appendChild(icon);
+  function createCustomIcon(isActive = false) {
+    const iconSize = isActive ? [48, 48] : [40, 40];
+    return L.divIcon({
+      className: isActive ? "location-marker active" : "location-marker",
+      iconSize: iconSize,
+      iconAnchor: [iconSize[0] / 2, iconSize[1] / 2],
+      html: '<div class="marker-inner"></div>',
     });
   }
 
   /**
-   * Calculate transform values to center on a specific position
+   * Create travel path connecting all locations
    */
-  function calculateTransform(position, scale) {
-    // Calculate offset to center the position in viewport
-    const offsetX = (50 - position.x) * scale;
-    const offsetY = (25 - position.y) * scale;
+  function createTravelPath() {
+    // Extract coordinates from locations in order
+    const pathCoordinates = locations.map((location) => [
+      location.coordinates.lat,
+      location.coordinates.lng,
+    ]);
 
-    return {
-      scale,
-      translateX: offsetX,
-      translateY: offsetY,
-    };
+    // Create polyline with custom styling
+    travelPath = L.polyline(pathCoordinates, {
+      color: "#3B82F6",
+      weight: 3,
+      opacity: 0.7,
+      smoothFactor: 1,
+      dashArray: "10, 5",
+    }).addTo(map);
   }
 
   /**
-   * Apply transform to map
+   * Create marker elements for each location
    */
-  function applyMapTransform(transform) {
-    const transformValue = `
-      scale(${transform.scale}) 
-      translate(${transform.translateX}%, ${transform.translateY}%)
-    `;
-    mapImage.style.transform = transformValue;
-    iconsContainer.style.transform = transformValue;
+  function createMarkers() {
+    // First create the travel path
+    createTravelPath();
+
+    // Then create markers on top
+    locations.forEach((location, index) => {
+      const marker = L.marker(
+        [location.coordinates.lat, location.coordinates.lng],
+        {
+          icon: createCustomIcon(false),
+        },
+      ).addTo(map);
+
+      marker.locationIndex = index;
+
+      // Add click handler to marker
+      marker.on("click", () => {
+        showLocationDetails(index);
+      });
+
+      markers.push(marker);
+    });
   }
 
   /**
-   * Show a specific icon with entrance animation
+   * Clear all active marker states
    */
-  function showIcon(index, withAnimation = true) {
-    const icon = iconsContainer.querySelector(
-      `[data-id="${locations[index].id}"]`,
-    );
-    if (icon) {
-      icon.classList.add("visible");
+  function clearActiveMarkers() {
+    markers.forEach((marker) => {
+      marker.setIcon(createCustomIcon(false));
+      const element = marker.getElement();
+      if (element) {
+        element.classList.remove("active");
+      }
+    });
+  }
 
-      if (withAnimation && !icon.classList.contains("has-entered")) {
-        icon.classList.add("entering");
-        icon.classList.add("has-entered");
-
-        // Remove entrance animation class after it completes
-        setTimeout(() => {
-          icon.classList.remove("entering");
-        }, 800);
+  /**
+   * Set a specific marker as active
+   */
+  function setActiveMarker(index) {
+    clearActiveMarkers();
+    if (markers[index]) {
+      markers[index].setIcon(createCustomIcon(true));
+      const element = markers[index].getElement();
+      if (element) {
+        element.classList.add("active");
       }
     }
   }
 
   /**
-   * Hide a specific icon
+   * Show location details when marker is clicked
    */
-  function hideIcon(index) {
-    const icon = iconsContainer.querySelector(
-      `[data-id="${locations[index].id}"]`,
-    );
-    if (icon) {
-      icon.classList.remove("visible", "active");
-    }
-  }
+  function showLocationDetails(index) {
+    if (index < 0 || index >= locations.length) return;
 
-  /**
-   * Hide all icons
-   */
-  function hideAllIcons() {
-    document.querySelectorAll(".location-icon").forEach((icon) => {
-      icon.classList.remove("visible", "active");
-    });
-  }
-
-  /**
-   * Set a specific icon as active
-   */
-  function setActiveIcon(index) {
-    clearActiveIcons();
-    const icon = iconsContainer.querySelector(
-      `[data-id="${locations[index].id}"]`,
-    );
-    if (icon) {
-      icon.classList.add("active");
-    }
-  }
-
-  /**
-   * Clear all active icon states
-   */
-  function clearActiveIcons() {
-    document.querySelectorAll(".location-icon.active").forEach((icon) => {
-      icon.classList.remove("active");
-    });
-  }
-
-  /**
-   * Navigate to a specific location
-   */
-  function goToLocation(index) {
-    if (isTransitioning) return;
-
-    // Validate index bounds
-    if (index < -1 || index >= locations.length) return;
-
-    isTransitioning = true;
-
-    // Update current location
     currentLocationIndex = index;
-
-    // Update max visited index
-    if (index > maxVisitedIndex) {
-      maxVisitedIndex = index;
-    }
-
-    // If index is -1, show full map view with all visited icons
-    if (index === -1) {
-      applyMapTransform({ scale: 1, translateX: 0, translateY: 0 });
-      hideInfoOverlay();
-      clearActiveIcons();
-
-      // Show all visited location icons
-      hideAllIcons();
-      for (let i = 0; i <= maxVisitedIndex; i++) {
-        showIcon(i, false);
-      }
-
-      updateCounter();
-      setTimeout(() => {
-        isTransitioning = false;
-      }, TRANSITION_DURATION);
-      return;
-    }
-
-    // Calculate and apply transform for specific location
     const location = locations[index];
-    const transform = calculateTransform(location.position, ZOOM_SCALE);
-    applyMapTransform(transform);
 
-    // Hide all icons first, then show only current one
-    hideAllIcons();
-    showIcon(index, true);
-    setActiveIcon(index);
+    // Calculate offset to show marker above the overlay
+    // Get map container height
+    const mapHeight = map.getContainer().clientHeight;
+    // Overlay takes approximately 70vh (70% of viewport height)
+    // We want to offset the center upward by about 20% of map height
+    const pixelOffset = mapHeight * 0.3;
+
+    // Convert pixel offset to lat/lng offset
+    const targetPoint = map.project(
+      [location.coordinates.lat, location.coordinates.lng],
+      mapConfig.focusZoom,
+    );
+    targetPoint.y += pixelOffset;
+    const targetLatLng = map.unproject(targetPoint, mapConfig.focusZoom);
+
+    // Fly to the offset location
+    map.flyTo(targetLatLng, mapConfig.focusZoom, {
+      duration: 0.8,
+    });
+
+    // Set marker as active
+    setActiveMarker(index);
 
     // Update info overlay
+    locationTitle.textContent = location.title;
+    locationDescription.textContent = location.description;
+
+    // Load and autoplay video without controls initially
+    videoPlayer.querySelector("source").src = location.video;
+    videoPlayer.removeAttribute("controls");
+    videoPlayer.load();
+    videoPlayer.play().catch((error) => {
+      // Autoplay might be blocked by browser, show controls so user can play manually
+      console.log("Autoplay prevented:", error);
+      videoPlayer.setAttribute("controls", "");
+    });
+
+    // Show controls when user taps/clicks on video
+    videoPlayer.onclick = () => {
+      if (!videoPlayer.hasAttribute("controls")) {
+        videoPlayer.setAttribute("controls", "");
+      }
+    };
+
+    // Show the overlay
     setTimeout(() => {
-      locationTitle.textContent = location.title;
-      locationDescription.textContent = location.description;
-
-      // Load and autoplay video without controls initially
-      videoPlayer.querySelector("source").src = location.video;
-      videoPlayer.removeAttribute('controls');
-      videoPlayer.load();
-      videoPlayer.play().catch(error => {
-        // Autoplay might be blocked by browser, show controls so user can play manually
-        console.log('Autoplay prevented:', error);
-        videoPlayer.setAttribute('controls', '');
-      });
-      
-      // Show controls when user taps/clicks on video
-      videoPlayer.onclick = () => {
-        if (!videoPlayer.hasAttribute('controls')) {
-          videoPlayer.setAttribute('controls', '');
-        }
-      };
-
       infoOverlay.classList.add("active");
-      isTransitioning = false;
-    }, TRANSITION_DURATION / 2);
+    }, 400);
 
     updateCounter();
   }
@@ -235,6 +220,14 @@
     // Pause and reset video when hiding overlay
     videoPlayer.pause();
     videoPlayer.currentTime = 0;
+
+    // Reset to overview
+    currentLocationIndex = -1;
+    clearActiveMarkers();
+    map.flyTo(mapConfig.center, mapConfig.initialZoom, {
+      duration: 0.8,
+    });
+    updateCounter();
   }
 
   /**
@@ -245,140 +238,28 @@
   }
 
   /**
-   * Navigate to next location
-   */
-  function goToNext() {
-    // If at last location, go back to full map view
-    if (currentLocationIndex === locations.length - 1) {
-      goToLocation(-1);
-    } else if (currentLocationIndex < locations.length - 1) {
-      goToLocation(currentLocationIndex + 1);
-    }
-  }
-
-  /**
-   * Navigate to previous location
-   */
-  function goToPrevious() {
-    if (currentLocationIndex > -1) {
-      goToLocation(currentLocationIndex - 1);
-    }
-  }
-
-  /**
-   * Handle wheel/scroll event for navigation
-   */
-  function handleScroll(event) {
-    // Prevent default scrolling
-    event.preventDefault();
-
-    // Don't accumulate scroll during transitions
-    if (isTransitioning) {
-      scrollAccumulator = 0;
-      return;
-    }
-
-    // Get scroll delta (normalized across different browsers/devices)
-    let delta = 0;
-    if (event.deltaY) {
-      delta = event.deltaY;
-    } else if (event.wheelDelta) {
-      delta = -event.wheelDelta;
-    } else if (event.detail) {
-      delta = event.detail * 40;
-    }
-
-    // Accumulate scroll delta
-    scrollAccumulator += delta;
-
-    // Check if we've reached the threshold
-    if (Math.abs(scrollAccumulator) >= SCROLL_THRESHOLD) {
-      if (scrollAccumulator > 0) {
-        // Scrolling down = next location
-        goToNext();
-      } else {
-        // Scrolling up = previous location
-        goToPrevious();
-      }
-
-      // Reset accumulator
-      scrollAccumulator = 0;
-    }
-  }
-
-  /**
-   * Handle touch events for mobile swipe
-   */
-  let touchStartY = 0;
-  let touchEndY = 0;
-
-  function handleTouchStart(event) {
-    // Don't handle touches on the info overlay
-    if (event.target.closest(".info-overlay")) {
-      return;
-    }
-    touchStartY = event.touches[0].clientY;
-  }
-
-  function handleTouchMove(event) {
-    // Don't handle touches on the info overlay
-    if (event.target.closest(".info-overlay")) {
-      return;
-    }
-    touchEndY = event.touches[0].clientY;
-  }
-
-  function handleTouchEnd(event) {
-    // Don't handle touches on the info overlay
-    if (event.target.closest(".info-overlay")) {
-      touchStartY = 0;
-      touchEndY = 0;
-      return;
-    }
-
-    if (isTransitioning) return;
-
-    const deltaY = touchStartY - touchEndY;
-    const threshold = 50;
-
-    if (Math.abs(deltaY) > threshold) {
-      if (deltaY > 0) {
-        // Swiped up = next location
-        goToNext();
-      } else {
-        // Swiped down = previous location
-        goToPrevious();
-      }
-    }
-
-    // Reset touch positions
-    touchStartY = 0;
-    touchEndY = 0;
-  }
-
-  /**
    * Initialize event listeners
    */
   function initEventListeners() {
-    // Wheel event for desktop scroll
-    window.addEventListener("wheel", handleScroll, { passive: false });
+    // Close overlay when clicking the handle
+    const infoHandle = document.querySelector(".info-handle");
+    if (infoHandle) {
+      infoHandle.addEventListener("click", hideInfoOverlay);
+    }
 
-    // Touch events for mobile swipe
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
-
-    // Keyboard navigation
+    // Close overlay on Escape key
     document.addEventListener("keydown", (e) => {
-      // Navigate with arrow keys
-      if (!isTransitioning) {
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-          e.preventDefault();
-          goToNext();
-        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-          e.preventDefault();
-          goToPrevious();
-        }
+      if (e.key === "Escape" && infoOverlay.classList.contains("active")) {
+        e.preventDefault();
+        hideInfoOverlay();
+      }
+    });
+
+    // Click on map (non-marker area) returns to startup state
+    map.on("click", (e) => {
+      // Only trigger if overlay is active (a location is selected)
+      if (infoOverlay.classList.contains("active")) {
+        hideInfoOverlay();
       }
     });
   }
@@ -389,8 +270,6 @@
   function init() {
     loadLocations().then(() => {
       initEventListeners();
-      // Start at intro view (full map)
-      goToLocation(-1);
     });
   }
 

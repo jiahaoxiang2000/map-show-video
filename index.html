@@ -4,18 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>地图探索</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- Container for the map explorer -->
   <div class="map-container">
-    <!-- Fixed map layer -->
-    <div class="map-wrapper">
-      <img class="map-image" src="assets/map.svg" alt="互动地图">
-      
-      <!-- Location icons container -->
-      <div class="icons-container"></div>
-    </div>
+    <!-- Leaflet map container -->
+    <div id="map" class="map-wrapper"></div>
     
     <!-- Bottom sheet overlay for location info -->
     <div class="info-overlay">
@@ -38,6 +35,8 @@
     </div>
   </div>
   
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
