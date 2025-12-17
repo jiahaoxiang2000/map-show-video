@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>地图探索</title>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>韶山景点导览</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- Container for the map explorer -->
   <div class="map-container">
-    <!-- Leaflet map container -->
+    <!-- Custom background map container -->
     <div id="map" class="map-wrapper"></div>
     
     <!-- Bottom sheet overlay for location info -->
@@ -28,15 +26,8 @@
         </div>
       </div>
     </div>
-    
-    <!-- Location counter -->
-    <div class="location-counter">
-      <span class="current-location">0</span> / <span class="total-locations">3</span>
-    </div>
   </div>
   
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

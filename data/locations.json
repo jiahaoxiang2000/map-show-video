@@ -1,37 +1,47 @@
 {
   "mapConfig": {
-    "center": [27.91442, 112.52503],
-    "initialZoom": 13,
-    "focusZoom": 16
+    "backgroundImage": "assets/background.png",
+    "imageWidth": 3840,
+    "imageHeight": 2160
   },
   "locations": [
     {
       "id": 1,
-      "title": "山峰",
-      "description": "最高海拔处令人惊叹的观景点。体验周围景观的壮丽全景。",
-      "coordinates": {
-        "lat": 27.92442,
-        "lng": 112.51503
+      "title": "韶山滴水洞",
+      "description": "韶山滴水洞，位于韶山冲西边的角落，与主席故居相距3公里。滴水洞天，是韶山风景中一个著名的景点。",
+      "position": {
+        "x": 16,
+        "y": 50
       },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 2,
-      "title": "水晶湖",
-      "description": "一片纯净的高山湖泊,湖水清澈见底。是放松身心和自然摄影的完美地点。",
-      "coordinates": {
-        "lat": 27.91442,
-        "lng": 112.53503
+      "title": "韶山铜像广场",
+      "description": "毛泽东同志铜像广场，是韶山的标志性景点。铜像高6米，基座高4.1米，象征着1893年12月26日和1949年10月1日。",
+      "position": {
+        "x": 39,
+        "y": 52
       },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 3,
-      "title": "古老森林",
-      "description": "漫步在这片神奇森林中的百年古树之间。这里是多种野生动物和稀有植物的家园。",
-      "coordinates": {
-        "lat": 27.90442,
-        "lng": 112.52503
+      "title": "韶山毛泽东同志纪念馆",
+      "description": "韶山毛泽东同志纪念馆，是全面展示毛泽东生平事迹、思想和人格风范的重要场所。",
+      "position": {
+        "x": 55,
+        "y": 60
+      },
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
+    },
+    {
+      "id": 4,
+      "title": "韶山毛泽东故居",
+      "description": "毛泽东故居，是毛泽东出生和少年时期生活的地方，位于韶山冲。这里保留着当年的原貌。",
+      "position": {
+        "x": 82,
+        "y": 58
       },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     }

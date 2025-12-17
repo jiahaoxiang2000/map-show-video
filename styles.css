@@ -13,6 +13,7 @@
   --text-secondary: #6B7280;
   --shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
   --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --vh: 1vh;
 }
 
 html, body {
@@ -26,11 +27,12 @@ html, body {
 /* Map container */
 .map-container {
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   position: relative;
   overflow: hidden;
 }
 
-/* Leaflet map wrapper */
+/* Custom background map wrapper */
 .map-wrapper,
 #map {
   position: fixed;
@@ -38,19 +40,22 @@ html, body {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
   z-index: 1;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #1a1a2e;
 }
 
-/* Hide Leaflet attribution */
-.leaflet-control-attribution {
-  display: none !important;
-}
-
-/* Custom Leaflet marker styles */
+/* Custom marker styles */
 .location-marker {
-  background: none !important;
-  border: none !important;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
 }
 
 .location-marker .marker-inner {
@@ -127,6 +132,7 @@ html, body {
   transition: transform 0.5s var(--transition-smooth);
   z-index: 100;
   max-height: 70vh;
+  max-height: calc(var(--vh, 1vh) * 70);
   overflow-y: auto;
 }
 
@@ -171,26 +177,8 @@ html, body {
   border-radius: 12px;
   background: black;
   max-height: 40vh;
+  max-height: calc(var(--vh, 1vh) * 40);
 }
-
-/* Location counter */
-.location-counter {
-  position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 8px 16px;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-
 
 /* Desktop adjustments */
 @media (min-width: 768px) {
@@ -215,12 +203,8 @@ html, body {
     font-size: 1.125rem;
   }
   
-  .location-counter {
-    font-size: 1rem;
-    top: 32px;
-  }
-  
   .video-player {
     max-height: 50vh;
+    max-height: calc(var(--vh, 1vh) * 50);
   }
 }

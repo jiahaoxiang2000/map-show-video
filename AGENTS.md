@@ -3,17 +3,17 @@
 ## Build/Run Commands
 
 - **Run locally**: `python3 -m http.server 8080` or `npx serve`
-- **No build step**: Pure static HTML/CSS/JS with Leaflet.js CDN
+- **No build step**: Pure static HTML/CSS/JS
 - **No tests**: Manual testing via browser DevTools
 
 ## Architecture
 
 ### Map Integration
 
-- **Map Library**: Leaflet.js (v1.9.4) loaded via CDN
-- **Map Tiles**: OpenStreetMap tiles (free, no API key required)
-- **Location System**: Uses real-world latitude/longitude coordinates
-- **Navigation**: Smooth flyTo animations between locations
+- **Map Type**: Custom background image map (no external map library)
+- **Background Image**: Custom image from `assets/background.png`
+- **Location System**: Uses percentage-based positioning (x%, y%) on the background image
+- **Navigation**: Click markers to view location details
 
 ### Data Structure
 
@@ -22,18 +22,18 @@ Location data in `data/locations.json`:
 ```json
 {
   "mapConfig": {
-    "center": [lat, lng],      // Map center coordinates
-    "initialZoom": 13,         // Zoom level for overview
-    "focusZoom": 16            // Zoom level when focused on location
+    "backgroundImage": "assets/background.png",  // Path to background image
+    "imageWidth": 3840,                          // Original image width (4K)
+    "imageHeight": 2160                          // Original image height (4K)
   },
   "locations": [
     {
       "id": number,
       "title": "中文标题",
       "description": "中文描述",
-      "coordinates": {
-        "lat": number,         // Latitude (纬度)
-        "lng": number          // Longitude (经度)
+      "position": {
+        "x": number,           // Horizontal position (0-100%)
+        "y": number            // Vertical position (0-100%)
       },
       "video": "url"
     }
@@ -53,7 +53,8 @@ Location data in `data/locations.json`:
 - Arrow functions for callbacks, regular functions for named utilities
 - Early returns for guard clauses
 - Async/await for promises, with try/catch error handling
-- Leaflet API: Use `L.map()`, `L.marker()`, `L.divIcon()`, `map.flyTo()`
+- DOM manipulation: Use `createElement()`, `appendChild()`, `addEventListener()`
+- Create markers and SVG paths dynamically based on location data
 
 ### CSS (styles.css)
 
@@ -62,7 +63,8 @@ Location data in `data/locations.json`:
 - BEM-like naming: `.component-name`, `.component-name__element`, `.component-name--modifier`
 - Group related selectors with comments (e.g., `/* Bottom sheet overlay */`)
 - Use `transition` for state changes, `animation` with `@keyframes` for complex effects
-- Leaflet overrides: Target `.location-marker` for custom marker styles
+- Custom marker styles: Target `.location-marker` for positioning and appearance
+- Background image: Use `background-size: cover` and `background-position: center`
 
 ### HTML (index.html)
 
@@ -70,7 +72,7 @@ Location data in `data/locations.json`:
 - Use `data-*` attributes for JS hooks
 - Include descriptive HTML comments for major sections
 - Keep inline styles minimal (use classes)
-- Leaflet CSS and JS loaded from CDN in correct order (CSS in head, JS before main.js)
+- No external map libraries - pure vanilla JavaScript implementation
 
 ## Content
 
@@ -84,8 +86,10 @@ Location data in `data/locations.json`:
 
 ## Map Configuration Tips
 
-- Default coordinates use Beijing area as example (39.9042, 116.4074)
-- Adjust `mapConfig.center` to your desired map center
-- Adjust `mapConfig.initialZoom` (lower = more zoomed out, higher = more zoomed in)
-- Adjust `mapConfig.focusZoom` for close-up view of individual locations
-- Use tools like latlong.net or OpenStreetMap to find coordinates
+- Use percentage-based positioning (0-100) for x and y coordinates
+- `position.x`: Horizontal position (0% = left edge, 100% = right edge)
+- `position.y`: Vertical position (0% = top edge, 100% = bottom edge)
+- Markers are automatically centered on their position coordinates
+- Background image should be placed in `assets/` folder
+- Update `mapConfig.backgroundImage` path if using a different image
+- Original image dimensions in `mapConfig` are used for reference only
