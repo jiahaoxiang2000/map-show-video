@@ -7,8 +7,6 @@
 
   // DOM Elements
   const infoOverlay = document.querySelector(".info-overlay");
-  const locationTitle = document.querySelector(".location-title");
-  const locationDescription = document.querySelector(".location-description");
   const videoPlayer = document.querySelector(".video-player");
   const mapElement = document.getElementById("map");
 
@@ -182,7 +180,7 @@
   }
 
   /**
-   * Show location details when marker is clicked
+   * Show location video when marker is clicked
    */
   function showLocationDetails(index) {
     if (index < 0 || index >= locations.length) return;
@@ -192,10 +190,6 @@
 
     // Set marker as active
     setActiveMarker(index);
-
-    // Update info overlay
-    locationTitle.textContent = location.title;
-    locationDescription.textContent = location.description;
 
     // Load and autoplay video without controls initially
     videoPlayer.querySelector("source").src = location.video;
@@ -212,6 +206,11 @@
       if (!videoPlayer.hasAttribute("controls")) {
         videoPlayer.setAttribute("controls", "");
       }
+    };
+
+    // Auto close overlay when video ends
+    videoPlayer.onended = () => {
+      hideInfoOverlay();
     };
 
     // Show the overlay
@@ -238,11 +237,18 @@
    * Initialize event listeners
    */
   function initEventListeners() {
-    // Close overlay when clicking the handle
-    const infoHandle = document.querySelector(".info-handle");
-    if (infoHandle) {
-      infoHandle.addEventListener("click", hideInfoOverlay);
-    }
+    // Close overlay when clicking anywhere on the overlay (except video controls)
+    infoOverlay.addEventListener("click", (e) => {
+      // Don't close if clicking on video controls
+      if (!e.target.closest(".video-player")) {
+        hideInfoOverlay();
+      }
+    });
+
+    // Prevent video clicks from closing overlay
+    videoPlayer.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
 
     // Close overlay on Escape key
     document.addEventListener("keydown", (e) => {
