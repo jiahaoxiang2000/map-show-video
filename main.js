@@ -127,9 +127,16 @@
       marker.classList.add("location-marker");
       marker.dataset.index = index;
       
-      const markerInner = document.createElement("div");
-      markerInner.classList.add("marker-inner");
-      marker.appendChild(markerInner);
+      // Create pin icon container
+      const markerPin = document.createElement("div");
+      markerPin.classList.add("marker-pin");
+      marker.appendChild(markerPin);
+      
+      // Create label with location name
+      const markerLabel = document.createElement("div");
+      markerLabel.classList.add("marker-label");
+      markerLabel.textContent = location.title;
+      marker.appendChild(markerLabel);
       
       // Add click handler
       marker.addEventListener("click", () => {

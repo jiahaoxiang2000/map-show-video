@@ -7,41 +7,41 @@
   "locations": [
     {
       "id": 1,
-      "title": "韶山滴水洞",
+      "title": "滴水洞",
       "description": "韶山滴水洞，位于韶山冲西边的角落，与主席故居相距3公里。滴水洞天，是韶山风景中一个著名的景点。",
       "position": {
         "x": 16,
-        "y": 50
-      },
-      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
-    },
-    {
-      "id": 2,
-      "title": "韶山铜像广场",
-      "description": "毛泽东同志铜像广场，是韶山的标志性景点。铜像高6米，基座高4.1米，象征着1893年12月26日和1949年10月1日。",
-      "position": {
-        "x": 39,
-        "y": 52
-      },
-      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
-    },
-    {
-      "id": 3,
-      "title": "韶山毛泽东同志纪念馆",
-      "description": "韶山毛泽东同志纪念馆，是全面展示毛泽东生平事迹、思想和人格风范的重要场所。",
-      "position": {
-        "x": 55,
         "y": 60
       },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
+      "id": 2,
+      "title": "铜像广场",
+      "description": "毛泽东同志铜像广场，是韶山的标志性景点。铜像高6米，基座高4.1米，象征着1893年12月26日和1949年10月1日。",
+      "position": {
+        "x": 39,
+        "y": 62
+      },
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
+    },
+    {
+      "id": 3,
+      "title": "毛泽东同志纪念馆",
+      "description": "韶山毛泽东同志纪念馆，是全面展示毛泽东生平事迹、思想和人格风范的重要场所。",
+      "position": {
+        "x": 55,
+        "y": 70
+      },
+      "video": "https://www.w3schools.com/html/mov_bbb.mp4"
+    },
+    {
       "id": 4,
-      "title": "韶山毛泽东故居",
+      "title": "毛泽东故居",
       "description": "毛泽东故居，是毛泽东出生和少年时期生活的地方，位于韶山冲。这里保留着当年的原貌。",
       "position": {
         "x": 82,
-        "y": 58
+        "y": 68
       },
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     }
