@@ -1,6 +1,6 @@
 {
   "mapConfig": {
-    "backgroundImage": "assets/background.png",
+    "backgroundImage": "assets/background-optimized.webp",
     "imageWidth": 3840,
     "imageHeight": 2160
   },
