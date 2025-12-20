@@ -1,6 +1,7 @@
 {
   "mapConfig": {
-    "backgroundImage": "assets/background-optimized.webp",
+    "backgroundImageHorizontal": "assets/h-background.webp",
+    "backgroundImageVertical": "assets/v-background.webp",
     "imageWidth": 3840,
     "imageHeight": 2160
   },
@@ -9,40 +10,60 @@
       "id": 1,
       "title": "滴水洞",
       "description": "韶山滴水洞，位于韶山冲西边的角落，与主席故居相距3公里。滴水洞天，是韶山风景中一个著名的景点。",
-      "position": {
+      "positionHorizontal": {
         "x": 16,
-        "y": 60
+        "y": 40
       },
+      "positionVertical": {
+        "x": 60,
+        "y": -40
+      },
+      "icon": "assets/dong-icon.webp",
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 2,
       "title": "铜像广场",
       "description": "毛泽东同志铜像广场，是韶山的标志性景点。铜像高6米，基座高4.1米，象征着1893年12月26日和1949年10月1日。",
-      "position": {
-        "x": 39,
-        "y": 62
+      "positionHorizontal": {
+        "x": 35,
+        "y": 65
       },
+      "positionVertical": {
+        "x": 30,
+        "y": 0
+      },
+      "icon": "assets/tongxiang-icon.webp",
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 3,
       "title": "毛泽东同志纪念馆",
       "description": "韶山毛泽东同志纪念馆，是全面展示毛泽东生平事迹、思想和人格风范的重要场所。",
-      "position": {
-        "x": 55,
+      "positionHorizontal": {
+        "x": 60,
+        "y": 35
+      },
+      "positionVertical": {
+        "x": 65,
         "y": 70
       },
+      "icon": "assets/jilianguan-icon.webp",
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     },
     {
       "id": 4,
       "title": "毛泽东故居",
       "description": "毛泽东故居，是毛泽东出生和少年时期生活的地方，位于韶山冲。这里保留着当年的原貌。",
-      "position": {
-        "x": 82,
-        "y": 68
+      "positionHorizontal": {
+        "x": 85,
+        "y": 55
       },
+      "positionVertical": {
+        "x": 35,
+        "y": 130
+      },
+      "icon": "assets/guju-icon.webp",
       "video": "https://www.w3schools.com/html/mov_bbb.mp4"
     }
   ]

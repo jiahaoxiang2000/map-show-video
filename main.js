@@ -27,11 +27,36 @@
   }
 
   /**
+   * Get the appropriate background image based on screen orientation
+   */
+  function getBackgroundImageByOrientation() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Landscape mode (wider than tall) - use horizontal background
+    if (width > height) {
+      return mapConfig.backgroundImageHorizontal;
+    }
+    // Portrait mode (taller than wide) - use vertical background
+    else {
+      return mapConfig.backgroundImageVertical;
+    }
+  }
+
+  /**
+   * Update background image based on current orientation
+   */
+  function updateBackgroundImage() {
+    const bgImage = getBackgroundImageByOrientation();
+    mapElement.style.backgroundImage = `url('${bgImage}')`;
+  }
+
+  /**
    * Initialize custom background map
    */
   function initMap() {
-    // Set background image from config
-    mapElement.style.backgroundImage = `url('${mapConfig.backgroundImage}')`;
+    // Set initial background image based on orientation
+    updateBackgroundImage();
     
     // Set initial viewport height
     setViewportHeight();
@@ -42,6 +67,7 @@
     // Handle resize and orientation change
     window.addEventListener('resize', () => {
       setViewportHeight();
+      updateBackgroundImage();
       calculateBackgroundBounds();
       updateMarkerPositions();
     });
@@ -50,6 +76,7 @@
       // Wait for orientation change to complete
       setTimeout(() => {
         setViewportHeight();
+        updateBackgroundImage();
         calculateBackgroundBounds();
         updateMarkerPositions();
       }, 200);
@@ -91,6 +118,23 @@
   }
 
   /**
+   * Get position for current orientation
+   */
+  function getPositionForOrientation(location) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Landscape mode - use horizontal position
+    if (width > height) {
+      return location.positionHorizontal;
+    }
+    // Portrait mode - use vertical position
+    else {
+      return location.positionVertical;
+    }
+  }
+
+  /**
    * Convert percentage position to actual pixel position
    */
   function getActualPosition(percentX, percentY) {
@@ -125,16 +169,12 @@
       marker.classList.add("location-marker");
       marker.dataset.index = index;
       
-      // Create pin icon container
-      const markerPin = document.createElement("div");
-      markerPin.classList.add("marker-pin");
-      marker.appendChild(markerPin);
-      
-      // Create label with location name
-      const markerLabel = document.createElement("div");
-      markerLabel.classList.add("marker-label");
-      markerLabel.textContent = location.title;
-      marker.appendChild(markerLabel);
+      // Create icon image
+      const markerIcon = document.createElement("img");
+      markerIcon.classList.add("marker-icon");
+      markerIcon.src = location.icon;
+      markerIcon.alt = location.title;
+      marker.appendChild(markerIcon);
       
       // Add click handler
       marker.addEventListener("click", () => {
@@ -154,7 +194,8 @@
   function updateMarkerPositions() {
     markers.forEach((marker, index) => {
       const location = locations[index];
-      const pos = getActualPosition(location.position.x, location.position.y);
+      const position = getPositionForOrientation(location);
+      const pos = getActualPosition(position.x, position.y);
       marker.style.left = `${pos.x}px`;
       marker.style.top = `${pos.y}px`;
     });

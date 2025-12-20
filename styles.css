@@ -43,7 +43,7 @@ html, body {
   height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
   z-index: 1;
-  background-size: contain;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-color: #1a1a2e;
@@ -52,7 +52,7 @@ html, body {
 /* Custom marker styles */
 .location-marker {
   position: absolute;
-  transform: translate(-50%, -100%);
+  transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 10;
   transition: all 0.3s ease;
@@ -65,112 +65,51 @@ html, body {
   z-index: 20;
 }
 
-/* Red map pin icon */
-.location-marker .marker-pin {
-  width: 36px;
-  height: 48px;
-  position: relative;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+/* Icon image */
+.location-marker .marker-icon {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
   transition: all 0.3s ease;
+  background-color: transparent;
 }
 
-.location-marker .marker-pin::before {
-  content: '';
-  position: absolute;
-  width: 36px;
-  height: 36px;
-  background: #DC2626;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  top: 0;
-  left: 0;
-  border: 3px solid #991B1B;
-}
-
-.location-marker .marker-pin::after {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-}
-
-/* Marker label */
-.location-marker .marker-label {
-  background: rgba(220, 38, 38, 0.95);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  margin-top: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  pointer-events: none;
-  transition: all 0.3s ease;
+/* Remove white background from icons using mix-blend-mode */
+.location-marker .marker-icon {
+  mix-blend-mode: multiply;
 }
 
 /* Hover effects */
-.location-marker:hover .marker-pin {
-  transform: scale(1.15);
-  filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.5));
-}
-
-.location-marker:hover .marker-label {
-  background: rgba(185, 28, 28, 0.95);
-  transform: translateY(-2px);
+.location-marker:hover .marker-icon {
+  transform: scale(1.3);
+  filter: drop-shadow(0 8px 20px rgba(59, 130, 246, 0.8));
 }
 
 /* Active state */
-.location-marker.active .marker-pin {
-  animation: pinBounce 0.6s ease;
-  filter: drop-shadow(0 4px 16px rgba(220, 38, 38, 0.7));
+.location-marker.active .marker-icon {
+  animation: iconBounce 0.6s ease;
+  filter: drop-shadow(0 10px 24px rgba(59, 130, 246, 1));
+  transform: scale(1.4);
 }
 
-.location-marker.active .marker-label {
-  background: rgba(153, 27, 27, 1);
-  font-weight: 700;
-  transform: scale(1.05);
-}
-
-@keyframes pinBounce {
+@keyframes iconBounce {
   0% {
     transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-10px) scale(1.1);
+    transform: translateY(-16px) scale(1.45);
   }
   100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1.4);
   }
 }
 
 /* Responsive marker sizing */
 @media (max-width: 767px) {
-  .location-marker .marker-pin {
-    width: 30px;
-    height: 40px;
-  }
-  
-  .location-marker .marker-pin::before {
-    width: 30px;
-    height: 30px;
-    border: 2px solid #991B1B;
-  }
-  
-  .location-marker .marker-pin::after {
-    top: 6px;
-    width: 10px;
-    height: 10px;
-  }
-  
-  .location-marker .marker-label {
-    font-size: 12px;
-    padding: 4px 10px;
+  .location-marker .marker-icon {
+    width: 90px;
+    height: 90px;
   }
 }
 
