@@ -49,6 +49,42 @@ html, body {
   background-color: #1a1a2e;
 }
 
+/* SVG for red road paths */
+.road-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Red road path styling - watercolor artistic look */
+.road-svg path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawRoad 2s ease-out forwards, pulse 3s ease-in-out infinite 2s;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes drawRoad {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+    stroke-width: 4;
+  }
+  50% {
+    opacity: 0.6;
+    stroke-width: 3.5;
+  }
+}
+
 /* Custom marker styles */
 .location-marker {
   position: absolute;

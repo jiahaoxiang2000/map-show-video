@@ -9,6 +9,7 @@
   const infoOverlay = document.querySelector(".info-overlay");
   const videoPlayer = document.querySelector(".video-player");
   const mapElement = document.getElementById("map");
+  const roadSvg = document.getElementById("road-svg");
 
   // State
   let mapConfig = {};
@@ -16,6 +17,7 @@
   let markers = [];
   let currentLocationIndex = -1; // -1 = no location selected
   let backgroundBounds = { left: 0, top: 0, width: 0, height: 0 };
+  let roadPaths = [];
 
   /**
    * Set viewport height CSS variable for mobile browsers
@@ -70,6 +72,7 @@
       updateBackgroundImage();
       calculateBackgroundBounds();
       updateMarkerPositions();
+      updateRoadPaths();
     });
     
     window.addEventListener('orientationchange', () => {
@@ -79,6 +82,7 @@
         updateBackgroundImage();
         calculateBackgroundBounds();
         updateMarkerPositions();
+        updateRoadPaths();
       }, 200);
     });
   }
@@ -154,7 +158,9 @@
       mapConfig = data.mapConfig;
       locations = data.locations;
       initMap();
+      initSvgFilters();
       createMarkers();
+      createRoadPaths();
     } catch (error) {
       console.error("Failed to load locations:", error);
     }
@@ -199,6 +205,184 @@
       marker.style.left = `${pos.x}px`;
       marker.style.top = `${pos.y}px`;
     });
+  }
+
+  /**
+   * Create artistic red road paths between markers
+   * Uses watercolor-style curves with subtle variation
+   */
+  function createRoadPaths() {
+    if (locations.length < 2) return;
+
+    // Clear existing paths
+    roadSvg.innerHTML = '';
+    roadPaths = [];
+
+    // Get all marker positions
+    const positions = markers.map((marker, index) => {
+      const location = locations[index];
+      const position = getPositionForOrientation(location);
+      return getActualPosition(position.x, position.y);
+    });
+
+    // Create artistic path connecting all markers in order
+    for (let i = 0; i < positions.length - 1; i++) {
+      const start = positions[i];
+      const end = positions[i + 1];
+
+      // Calculate mid point for curve
+      const midX = (start.x + end.x) / 2;
+      const midY = (start.y + end.y) / 2;
+      
+      // Add organic curve with slight variation
+      // Use perpendicular offset for natural river-like flow
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Perpendicular vector for curve
+      const perpX = -dy / distance;
+      const perpY = dx / distance;
+      
+      // Curve offset based on distance (more distance = more curve)
+      const curveStrength = Math.min(distance * 0.15, 80);
+      const variation = (Math.random() - 0.5) * 20; // Random variation for organic feel
+      
+      const controlX = midX + perpX * (curveStrength + variation);
+      const controlY = midY + perpY * (curveStrength + variation);
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const pathData = `M ${start.x} ${start.y} Q ${controlX} ${controlY} ${end.x} ${end.y}`;
+      
+      path.setAttribute("d", pathData);
+      path.setAttribute("stroke", "#E07856");
+      path.setAttribute("stroke-width", "4");
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("stroke-linejoin", "round");
+      path.setAttribute("opacity", "0.8");
+      path.setAttribute("filter", "url(#road-shadow)");
+      
+      roadSvg.appendChild(path);
+      roadPaths.push(path);
+    }
+
+    // Update SVG size to match map
+    updateRoadSvgSize();
+  }
+
+  /**
+   * Update road paths when positions change
+   */
+  function updateRoadPaths() {
+    if (roadPaths.length === 0) {
+      createRoadPaths();
+      return;
+    }
+
+    const positions = markers.map((marker, index) => {
+      const location = locations[index];
+      const position = getPositionForOrientation(location);
+      return getActualPosition(position.x, position.y);
+    });
+
+    roadPaths.forEach((path, index) => {
+      const start = positions[index];
+      const end = positions[index + 1];
+
+      // Recalculate artistic curve
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      const perpX = -dy / distance;
+      const perpY = dx / distance;
+      
+      const curveStrength = Math.min(distance * 0.15, 80);
+      const variation = (Math.random() - 0.5) * 20;
+      
+      const controlX = start.x + dx / 2 + perpX * (curveStrength + variation);
+      const controlY = start.y + dy / 2 + perpY * (curveStrength + variation);
+
+      const pathData = `M ${start.x} ${start.y} Q ${controlX} ${controlY} ${end.x} ${end.y}`;
+      path.setAttribute("d", pathData);
+    });
+
+    updateRoadSvgSize();
+  }
+
+  /**
+   * Update SVG dimensions to match map container
+   */
+  function updateRoadSvgSize() {
+    const containerWidth = mapElement.offsetWidth;
+    const containerHeight = mapElement.offsetHeight;
+    
+    roadSvg.setAttribute("width", containerWidth);
+    roadSvg.setAttribute("height", containerHeight);
+    roadSvg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
+  }
+
+  /**
+   * Initialize SVG filters for watercolor-style effects
+   */
+  function initSvgFilters() {
+    // Clear existing defs
+    const existingDefs = roadSvg.querySelector('defs');
+    if (existingDefs) {
+      existingDefs.remove();
+    }
+
+    // Create defs with filters
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    
+    // Shadow filter for subtle depth
+    const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+    filter.setAttribute("id", "road-shadow");
+    filter.setAttribute("x", "-50%");
+    filter.setAttribute("y", "-50%");
+    filter.setAttribute("width", "200%");
+    filter.setAttribute("height", "200%");
+    
+    const feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+    feGaussianBlur.setAttribute("in", "SourceAlpha");
+    feGaussianBlur.setAttribute("stdDeviation", "2");
+    feGaussianBlur.setAttribute("result", "blur");
+    
+    const feOffset = document.createElementNS("http://www.w3.org/2000/svg", "feOffset");
+    feOffset.setAttribute("in", "blur");
+    feOffset.setAttribute("dx", "0");
+    feOffset.setAttribute("dy", "2");
+    feOffset.setAttribute("result", "offsetBlur");
+    
+    const feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+    feFlood.setAttribute("flood-color", "#000000");
+    feFlood.setAttribute("flood-opacity", "0.3");
+    feFlood.setAttribute("result", "shadowColor");
+    
+    const feComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    feComposite.setAttribute("in", "shadowColor");
+    feComposite.setAttribute("in2", "offsetBlur");
+    feComposite.setAttribute("operator", "in");
+    feComposite.setAttribute("result", "shadowBlur");
+    
+    const feMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+    const feMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    feMergeNode1.setAttribute("in", "shadowBlur");
+    const feMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    feMergeNode2.setAttribute("in", "SourceGraphic");
+    
+    feMerge.appendChild(feMergeNode1);
+    feMerge.appendChild(feMergeNode2);
+    
+    filter.appendChild(feGaussianBlur);
+    filter.appendChild(feOffset);
+    filter.appendChild(feFlood);
+    filter.appendChild(feComposite);
+    filter.appendChild(feMerge);
+    
+    defs.appendChild(filter);
+    roadSvg.insertBefore(defs, roadSvg.firstChild);
   }
 
   /**
