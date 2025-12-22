@@ -30,27 +30,18 @@
   }
 
   /**
-   * Get the appropriate background image based on screen orientation
+   * Check if device is in portrait orientation
    */
-  function getBackgroundImageByOrientation() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    // Landscape mode (wider than tall) - use horizontal background
-    if (width > height) {
-      return mapConfig.backgroundImageHorizontal;
-    }
-    // Portrait mode (taller than wide) - use vertical background
-    else {
-      return mapConfig.backgroundImageVertical;
-    }
+  function isPortrait() {
+    return window.innerHeight > window.innerWidth;
   }
 
   /**
-   * Update background image based on current orientation
+   * Update background image - always use horizontal background
    */
   function updateBackgroundImage() {
-    const bgImage = getBackgroundImageByOrientation();
+    // Always use horizontal background
+    const bgImage = mapConfig.backgroundImageHorizontal;
     mapElement.style.backgroundImage = `url('${bgImage}')`;
   }
 
@@ -93,8 +84,17 @@
    * when using background-size: contain
    */
   function calculateBackgroundBounds() {
-    const containerWidth = mapElement.offsetWidth;
-    const containerHeight = mapElement.offsetHeight;
+    let containerWidth, containerHeight;
+    
+    // In portrait mode, the container is rotated, so swap dimensions
+    if (isPortrait()) {
+      containerWidth = window.innerHeight;
+      containerHeight = window.innerWidth;
+    } else {
+      containerWidth = mapElement.offsetWidth;
+      containerHeight = mapElement.offsetHeight;
+    }
+    
     const containerAspect = containerWidth / containerHeight;
     const imageAspect = mapConfig.imageWidth / mapConfig.imageHeight;
 
@@ -124,19 +124,10 @@
 
   /**
    * Get position for current orientation
+   * Always use horizontal position since we always use horizontal background
    */
   function getPositionForOrientation(location) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    // Landscape mode - use horizontal position
-    if (width > height) {
-      return location.positionHorizontal;
-    }
-    // Portrait mode - use vertical position
-    else {
-      return location.positionVertical;
-    }
+    return location.positionHorizontal;
   }
 
   /**

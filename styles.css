@@ -43,10 +43,25 @@ html, body {
   height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
   z-index: 1;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   background-color: #1a1a2e;
+}
+
+/* Portrait mode - rotate map to landscape */
+@media (orientation: portrait) {
+  .map-wrapper,
+  #map {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    width: calc(var(--vh, 1vh) * 100);
+    height: 100vw;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center center;
+  }
 }
 
 /* SVG for red road paths */
