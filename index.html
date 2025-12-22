@@ -1,41 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>韶山景点导览</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- Preload all webp images for faster loading -->
-  <link rel="preload" as="image" href="assets/h-background.webp">
-  <link rel="preload" as="image" href="assets/v-background.webp">
-  <link rel="preload" as="image" href="assets/dong-icon.webp">
-  <link rel="preload" as="image" href="assets/tongxiang-icon.webp">
-  <link rel="preload" as="image" href="assets/jilianguan-icon.webp">
-  <link rel="preload" as="image" href="assets/guju-icon.webp">
-</head>
-<body>
-  <!-- Container for the map explorer -->
-  <div class="map-container">
-    <!-- Custom background map container -->
-    <div id="map" class="map-wrapper">
-      <!-- SVG for red road paths between markers -->
-      <svg id="road-svg" class="road-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
-    
-    <!-- Bottom sheet overlay for video -->
-    <div class="info-overlay">
-      <div class="info-handle"></div>
-      <div class="info-content">
-        <div class="video-container">
-          <video class="video-player" playsinline>
-            <source src="" type="video/mp4">
-            您的浏览器不支持视频播放。
-          </video>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>“红色讲解员”培养暨“红色故事成果”评选系列活动</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Preload all webp images for faster loading -->
+    <link rel="preload" as="image" href="assets/h-background.webp" />
+    <link rel="preload" as="image" href="assets/v-background.webp" />
+    <link rel="preload" as="image" href="assets/dong-icon.webp" />
+    <link rel="preload" as="image" href="assets/tongxiang-icon.webp" />
+    <link rel="preload" as="image" href="assets/jilianguan-icon.webp" />
+    <link rel="preload" as="image" href="assets/guju-icon.webp" />
+  </head>
+  <body>
+    <!-- Container for the map explorer -->
+    <div class="map-container">
+      <!-- Custom background map container -->
+      <div id="map" class="map-wrapper">
+        <!-- SVG for red road paths between markers -->
+        <svg
+          id="road-svg"
+          class="road-svg"
+          xmlns="http://www.w3.org/2000/svg"
+        ></svg>
+      </div>
+
+      <!-- Bottom sheet overlay for video -->
+      <div class="info-overlay">
+        <div class="info-handle"></div>
+        <div class="info-content">
+          <div class="video-container">
+            <button class="video-close-btn" aria-label="返回">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              <span>返回</span>
+            </button>
+            <video class="video-player" playsinline>
+              <source src="" type="video/mp4" />
+              您的浏览器不支持视频播放。
+            </video>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  
-  <script src="main.js"></script>
-</body>
+
+    <script src="main.js"></script>
+  </body>
 </html>

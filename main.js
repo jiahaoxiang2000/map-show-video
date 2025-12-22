@@ -8,6 +8,7 @@
   // DOM Elements
   const infoOverlay = document.querySelector(".info-overlay");
   const videoPlayer = document.querySelector(".video-player");
+  const videoCloseBtn = document.querySelector(".video-close-btn");
   const mapElement = document.getElementById("map");
   const roadSvg = document.getElementById("road-svg");
 
@@ -175,6 +176,12 @@
       marker.classList.add("location-marker");
       marker.dataset.index = index;
       
+      // Create title label above icon
+      const markerTitle = document.createElement("span");
+      markerTitle.classList.add("marker-title");
+      markerTitle.textContent = location.title;
+      marker.appendChild(markerTitle);
+      
       // Create icon image
       const markerIcon = document.createElement("img");
       markerIcon.classList.add("marker-icon");
@@ -208,6 +215,24 @@
   }
 
   /**
+   * Get icon center offset (to account for title above icon)
+   */
+  function getIconCenterOffset() {
+    // Get the first marker to measure title height
+    if (markers.length > 0) {
+      const title = markers[0].querySelector('.marker-title');
+      const icon = markers[0].querySelector('.marker-icon');
+      if (title && icon) {
+        // Offset is half the title height + margin (negative margin overlaps)
+        const titleHeight = title.offsetHeight;
+        const marginBottom = -8; // matches CSS margin-bottom (negative)
+        return (titleHeight + marginBottom) / 2;
+      }
+    }
+    return 0;
+  }
+
+  /**
    * Create artistic red road paths between markers
    * Uses watercolor-style curves with subtle variation
    */
@@ -218,11 +243,16 @@
     roadSvg.innerHTML = '';
     roadPaths = [];
 
-    // Get all marker positions
+    // Get icon center offset
+    const iconOffset = getIconCenterOffset();
+
+    // Get all marker positions (adjusted to icon center)
     const positions = markers.map((marker, index) => {
       const location = locations[index];
       const position = getPositionForOrientation(location);
-      return getActualPosition(position.x, position.y);
+      const pos = getActualPosition(position.x, position.y);
+      // Offset Y to icon center (below the title)
+      return { x: pos.x, y: pos.y + iconOffset };
     });
 
     // Create artistic path connecting all markers in order
@@ -280,10 +310,15 @@
       return;
     }
 
+    // Get icon center offset
+    const iconOffset = getIconCenterOffset();
+
     const positions = markers.map((marker, index) => {
       const location = locations[index];
       const position = getPositionForOrientation(location);
-      return getActualPosition(position.x, position.y);
+      const pos = getActualPosition(position.x, position.y);
+      // Offset Y to icon center (below the title)
+      return { x: pos.x, y: pos.y + iconOffset };
     });
 
     roadPaths.forEach((path, index) => {
@@ -406,6 +441,7 @@
 
   /**
    * Show location video when marker is clicked
+   * Video fills the page overlay and always plays in landscape orientation
    */
   function showLocationDetails(index) {
     if (index < 0 || index >= locations.length) return;
@@ -420,6 +456,8 @@
     videoPlayer.querySelector("source").src = location.video;
     videoPlayer.removeAttribute("controls");
     videoPlayer.load();
+    
+    // Auto play video (no native fullscreen, CSS handles full page display)
     videoPlayer.play().catch((error) => {
       // Autoplay might be blocked by browser, show controls so user can play manually
       console.log("Autoplay prevented:", error);
@@ -449,9 +487,13 @@
    */
   function hideInfoOverlay() {
     infoOverlay.classList.remove("active");
+    
     // Pause and reset video when hiding overlay
     videoPlayer.pause();
     videoPlayer.currentTime = 0;
+
+    // Clean up video event handlers
+    videoPlayer.onended = null;
 
     // Reset to overview
     currentLocationIndex = -1;
@@ -462,10 +504,16 @@
    * Initialize event listeners
    */
   function initEventListeners() {
-    // Close overlay when clicking anywhere on the overlay (except video controls)
+    // Close button click - back to main page
+    videoCloseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hideInfoOverlay();
+    });
+
+    // Close overlay when clicking anywhere on the overlay (except video and close button)
     infoOverlay.addEventListener("click", (e) => {
-      // Don't close if clicking on video controls
-      if (!e.target.closest(".video-player")) {
+      // Don't close if clicking on video controls or close button
+      if (!e.target.closest(".video-player") && !e.target.closest(".video-close-btn")) {
         hideInfoOverlay();
       }
     });

@@ -101,6 +101,21 @@ html, body {
   z-index: 20;
 }
 
+/* Title label above icon */
+.location-marker .marker-title {
+  background-color: #E07856;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 12px;
+  margin-bottom: -8px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
 /* Icon image */
 .location-marker .marker-icon {
   width: 120px;
@@ -143,6 +158,12 @@ html, body {
 
 /* Responsive marker sizing */
 @media (max-width: 767px) {
+  .location-marker .marker-title {
+    font-size: 12px;
+    padding: 3px 10px;
+    margin-bottom: -6px;
+  }
+  
   .location-marker .marker-icon {
     width: 90px;
     height: 90px;
@@ -171,53 +192,102 @@ html, body {
   transform: translateY(0);
 }
 
+/* Hide handle when video is playing */
 .info-handle {
-  width: 60px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 3px;
-  margin-bottom: 20px;
-  transition: background 0.3s ease;
-}
-
-.info-overlay:hover .info-handle {
-  background: rgba(255, 255, 255, 0.8);
+  display: none;
 }
 
 .info-content {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
 }
 
-/* Video container */
+/* Video container - always landscape orientation, fill page */
 .video-container {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 1200px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  background: black;
 }
 
-.video-player {
-  width: 100%;
-  height: auto;
-  max-height: 85vh;
-  max-height: calc(var(--vh, 1vh) * 85);
-  background: black;
-  border-radius: 8px;
+/* Close/Back button - small and subtle */
+.video-close-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
   pointer-events: auto;
 }
 
-/* Desktop adjustments */
-@media (min-width: 768px) {
+.video-close-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.video-close-btn:active {
+  transform: scale(0.9);
+}
+
+.video-close-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Hide text, only show icon */
+.video-close-btn span {
+  display: none;
+}
+
+.video-player {
+  background: black;
+  pointer-events: auto;
+  object-fit: contain;
+}
+
+/* Landscape mode - video fills the screen normally */
+@media (orientation: landscape) {
   .video-player {
-    max-height: 90vh;
-    max-height: calc(var(--vh, 1vh) * 90);
+    width: 100vw;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+/* Portrait mode - rotate video to landscape for better viewing */
+@media (orientation: portrait) {
+  .video-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    width: 100vh;
+    width: calc(var(--vh, 1vh) * 100);
+    height: 100vw;
+  }
+  
+  .video-player {
+    width: 100%;
+    height: 100%;
   }
 }
