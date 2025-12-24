@@ -11,6 +11,8 @@
   const videoCloseBtn = document.querySelector(".video-close-btn");
   const mapElement = document.getElementById("map");
   const roadSvg = document.getElementById("road-svg");
+  const splashScreen = document.getElementById("splash-screen");
+  const mapContainer = document.querySelector(".map-container");
 
   // State
   let mapConfig = {};
@@ -532,11 +534,39 @@
   }
 
   /**
+   * Hide splash screen and show map
+   */
+  function hideSplashScreen() {
+    if (!splashScreen) return;
+
+    splashScreen.classList.add("hidden");
+
+    // Show map container after splash starts fading
+    setTimeout(() => {
+      if (mapContainer) {
+        mapContainer.style.display = "block";
+      }
+    }, 400);
+
+    // Remove splash from DOM after animation completes
+    setTimeout(() => {
+      if (splashScreen && splashScreen.parentNode) {
+        splashScreen.parentNode.removeChild(splashScreen);
+      }
+    }, 800);
+  }
+
+  /**
    * Initialize the application
    */
   function init() {
     loadLocations().then(() => {
       initEventListeners();
+
+      // Click anywhere on splash screen to enter main page
+      if (splashScreen) {
+        splashScreen.addEventListener("click", hideSplashScreen);
+      }
     });
   }
 

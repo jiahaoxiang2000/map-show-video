@@ -6,9 +6,13 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>“红色讲解员”培养暨“红色故事成果”评选系列活动</title>
+    <title>
+      国网韶山市供电公司：送您一张韶山全景"红色地图"，点击观看韶电青工为您讲解红色故事
+    </title>
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="styles.css" />
     <!-- Preload all webp images for faster loading -->
+    <link rel="preload" as="image" href="assets/head-figure.webp" />
     <link rel="preload" as="image" href="assets/h-background.webp" />
     <link rel="preload" as="image" href="assets/dong-icon.webp" />
     <link rel="preload" as="image" href="assets/tongxiang-icon.webp" />
@@ -16,8 +20,13 @@
     <link rel="preload" as="image" href="assets/guju-icon.webp" />
   </head>
   <body>
+    <!-- Splash screen - shows head figure on first load -->
+    <div id="splash-screen" class="splash-screen">
+      <img class="splash-image" src="assets/head-figure.webp" alt="欢迎界面" />
+    </div>
+
     <!-- Container for the map explorer -->
-    <div class="map-container">
+    <div class="map-container" style="display: none">
       <!-- Custom background map container -->
       <div id="map" class="map-wrapper">
         <!-- SVG for red road paths between markers -->
