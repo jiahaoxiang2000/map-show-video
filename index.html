@@ -11,13 +11,11 @@
     </title>
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="styles.css" />
-    <!-- Preload all webp images for faster loading -->
+    <!-- Preload images for faster loading -->
     <link rel="preload" as="image" href="assets/head-figure.webp" />
     <link rel="preload" as="image" href="assets/h-background.webp" />
-    <link rel="preload" as="image" href="assets/dong-icon.webp" />
-    <link rel="preload" as="image" href="assets/tongxiang-icon.webp" />
-    <link rel="preload" as="image" href="assets/jilianguan-icon.webp" />
-    <link rel="preload" as="image" href="assets/guju-icon.webp" />
+    <!-- HLS.js for streaming video support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   </head>
   <body>
     <!-- Splash screen - shows head figure on first load -->
@@ -29,12 +27,15 @@
     <div class="map-container" style="display: none">
       <!-- Custom background map container -->
       <div id="map" class="map-wrapper">
-        <!-- SVG for red road paths between markers -->
-        <svg
-          id="road-svg"
-          class="road-svg"
-          xmlns="http://www.w3.org/2000/svg"
-        ></svg>
+        <!-- Transparent clickable markers will be added here by JavaScript -->
+        <!-- Special intro video button -->
+        <div id="intro-video-btn" class="intro-video-btn" style="display: none;">
+          <span>
+            <div>“闪闪红心 真情照亮”</div>
+            <div>韶山红色路线讲解</div>
+            <div>（点击景点红色标签可以观看青工视频讲解）</div>
+          </span>
+        </div>
       </div>
 
       <!-- Bottom sheet overlay for video -->
@@ -53,8 +54,12 @@
               </svg>
               <span>返回</span>
             </button>
-            <video class="video-player" playsinline>
-              <source src="" type="video/mp4" />
+            <!-- Loading indicator -->
+            <div class="video-loading">
+              <div class="loading-spinner"></div>
+              <span class="loading-text">视频加载中...</span>
+            </div>
+            <video class="video-player" playsinline preload="metadata">
               您的浏览器不支持视频播放。
             </video>
           </div>

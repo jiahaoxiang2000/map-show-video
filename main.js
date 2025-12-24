@@ -9,18 +9,20 @@
   const infoOverlay = document.querySelector(".info-overlay");
   const videoPlayer = document.querySelector(".video-player");
   const videoCloseBtn = document.querySelector(".video-close-btn");
+  const videoLoading = document.querySelector(".video-loading");
   const mapElement = document.getElementById("map");
-  const roadSvg = document.getElementById("road-svg");
   const splashScreen = document.getElementById("splash-screen");
   const mapContainer = document.querySelector(".map-container");
+  const introVideoBtn = document.getElementById("intro-video-btn");
 
   // State
   let mapConfig = {};
   let locations = [];
   let markers = [];
+  let introVideoConfig = null;
   let currentLocationIndex = -1; // -1 = no location selected
   let backgroundBounds = { left: 0, top: 0, width: 0, height: 0 };
-  let roadPaths = [];
+  let hls = null; // HLS.js instance
 
   /**
    * Set viewport height CSS variable for mobile browsers
@@ -66,7 +68,7 @@
       updateBackgroundImage();
       calculateBackgroundBounds();
       updateMarkerPositions();
-      updateRoadPaths();
+      updateIntroButtonPosition();
     });
     
     window.addEventListener('orientationchange', () => {
@@ -76,7 +78,7 @@
         updateBackgroundImage();
         calculateBackgroundBounds();
         updateMarkerPositions();
-        updateRoadPaths();
+        updateIntroButtonPosition();
       }, 200);
     });
   }
@@ -122,6 +124,11 @@
       width: bgWidth,
       height: bgHeight
     };
+    
+    // Debug: log background bounds
+    console.log('Background bounds:', backgroundBounds);
+    console.log('Container:', containerWidth, 'x', containerHeight);
+    console.log('Image aspect:', imageAspect, 'Container aspect:', containerAspect);
   }
 
   /**
@@ -151,36 +158,26 @@
       const data = await response.json();
       mapConfig = data.mapConfig;
       locations = data.locations;
+      introVideoConfig = data.introVideo;
       initMap();
-      initSvgFilters();
       createMarkers();
-      createRoadPaths();
+      updateIntroButtonPosition();
     } catch (error) {
       console.error("Failed to load locations:", error);
     }
   }
 
   /**
-   * Create marker elements for each location
+   * Create transparent marker elements for each location
+   * The red buttons are already drawn on the background image,
+   * so we only create invisible clickable areas over them
    */
   function createMarkers() {
     locations.forEach((location, index) => {
       const marker = document.createElement("div");
       marker.classList.add("location-marker");
       marker.dataset.index = index;
-      
-      // Create title label above icon
-      const markerTitle = document.createElement("span");
-      markerTitle.classList.add("marker-title");
-      markerTitle.textContent = location.title;
-      marker.appendChild(markerTitle);
-      
-      // Create icon image
-      const markerIcon = document.createElement("img");
-      markerIcon.classList.add("marker-icon");
-      markerIcon.src = location.icon;
-      markerIcon.alt = location.title;
-      marker.appendChild(markerIcon);
+      marker.title = location.title; // Tooltip on hover
       
       // Add click handler
       marker.addEventListener("click", () => {
@@ -196,221 +193,68 @@
 
   /**
    * Update marker positions based on current background bounds
+   * Also scales marker size proportionally to background image size
    */
   function updateMarkerPositions() {
+    // Calculate scale factor based on background width relative to original image
+    const scaleFactor = backgroundBounds.width / mapConfig.imageWidth;
+    
+    // Base marker size (for original image size)
+    const baseWidth = 200;
+    const baseHeight = 56;
+    
+    // Scaled marker size
+    const markerWidth = baseWidth * scaleFactor;
+    const markerHeight = baseHeight * scaleFactor;
+    
     markers.forEach((marker, index) => {
       const location = locations[index];
       const position = getPositionForOrientation(location);
       const pos = getActualPosition(position.x, position.y);
       marker.style.left = `${pos.x}px`;
       marker.style.top = `${pos.y}px`;
+      marker.style.width = `${markerWidth}px`;
+      marker.style.height = `${markerHeight}px`;
+      marker.style.borderRadius = `${markerHeight / 2}px`;
     });
   }
 
   /**
-   * Get icon center offset (to account for title above icon)
+   * Update intro button position based on background bounds
    */
-  function getIconCenterOffset() {
-    // Get the first marker to measure title height
-    if (markers.length > 0) {
-      const title = markers[0].querySelector('.marker-title');
-      const icon = markers[0].querySelector('.marker-icon');
-      if (title && icon) {
-        // Offset is half the title height + margin (negative margin overlaps)
-        const titleHeight = title.offsetHeight;
-        const marginBottom = -8; // matches CSS margin-bottom (negative)
-        return (titleHeight + marginBottom) / 2;
-      }
+  function updateIntroButtonPosition() {
+    if (!introVideoBtn || !introVideoConfig) return;
+    
+    const position = introVideoConfig.positionHorizontal;
+    const pos = getActualPosition(position.x, position.y);
+    
+    // Scale button size based on background
+    const scaleFactor = backgroundBounds.width / mapConfig.imageWidth;
+    const basePadding = 20;
+    const baseFontSize = 16;
+    const baseMaxWidth = 400;
+    const baseMinHeight = 80;
+    const baseGap = 8;
+    
+    const padding = basePadding * scaleFactor;
+    const fontSize = baseFontSize * scaleFactor;
+    const maxWidth = baseMaxWidth * scaleFactor;
+    const minHeight = baseMinHeight * scaleFactor;
+    const gap = baseGap * scaleFactor;
+    
+    introVideoBtn.style.left = `${pos.x}px`;
+    introVideoBtn.style.top = `${pos.y}px`;
+    introVideoBtn.style.padding = `${padding}px ${padding * 1.5}px`;
+    introVideoBtn.style.fontSize = `${fontSize}px`;
+    introVideoBtn.style.borderRadius = `${padding}px`;
+    introVideoBtn.style.maxWidth = `${maxWidth}px`;
+    introVideoBtn.style.minHeight = `${minHeight}px`;
+    
+    // Update line gap
+    const span = introVideoBtn.querySelector('span');
+    if (span) {
+      span.style.gap = `${gap}px`;
     }
-    return 0;
-  }
-
-  /**
-   * Create artistic red road paths between markers
-   * Uses watercolor-style curves with subtle variation
-   */
-  function createRoadPaths() {
-    if (locations.length < 2) return;
-
-    // Clear existing paths
-    roadSvg.innerHTML = '';
-    roadPaths = [];
-
-    // Get icon center offset
-    const iconOffset = getIconCenterOffset();
-
-    // Get all marker positions (adjusted to icon center)
-    const positions = markers.map((marker, index) => {
-      const location = locations[index];
-      const position = getPositionForOrientation(location);
-      const pos = getActualPosition(position.x, position.y);
-      // Offset Y to icon center (below the title)
-      return { x: pos.x, y: pos.y + iconOffset };
-    });
-
-    // Create artistic path connecting all markers in order
-    for (let i = 0; i < positions.length - 1; i++) {
-      const start = positions[i];
-      const end = positions[i + 1];
-
-      // Calculate mid point for curve
-      const midX = (start.x + end.x) / 2;
-      const midY = (start.y + end.y) / 2;
-      
-      // Add organic curve with slight variation
-      // Use perpendicular offset for natural river-like flow
-      const dx = end.x - start.x;
-      const dy = end.y - start.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      // Perpendicular vector for curve
-      const perpX = -dy / distance;
-      const perpY = dx / distance;
-      
-      // Curve offset based on distance (more distance = more curve)
-      const curveStrength = Math.min(distance * 0.15, 80);
-      const variation = (Math.random() - 0.5) * 20; // Random variation for organic feel
-      
-      const controlX = midX + perpX * (curveStrength + variation);
-      const controlY = midY + perpY * (curveStrength + variation);
-
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      const pathData = `M ${start.x} ${start.y} Q ${controlX} ${controlY} ${end.x} ${end.y}`;
-      
-      path.setAttribute("d", pathData);
-      path.setAttribute("stroke", "#E07856");
-      path.setAttribute("stroke-width", "4");
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke-linecap", "round");
-      path.setAttribute("stroke-linejoin", "round");
-      path.setAttribute("opacity", "0.8");
-      path.setAttribute("filter", "url(#road-shadow)");
-      
-      roadSvg.appendChild(path);
-      roadPaths.push(path);
-    }
-
-    // Update SVG size to match map
-    updateRoadSvgSize();
-  }
-
-  /**
-   * Update road paths when positions change
-   */
-  function updateRoadPaths() {
-    if (roadPaths.length === 0) {
-      createRoadPaths();
-      return;
-    }
-
-    // Get icon center offset
-    const iconOffset = getIconCenterOffset();
-
-    const positions = markers.map((marker, index) => {
-      const location = locations[index];
-      const position = getPositionForOrientation(location);
-      const pos = getActualPosition(position.x, position.y);
-      // Offset Y to icon center (below the title)
-      return { x: pos.x, y: pos.y + iconOffset };
-    });
-
-    roadPaths.forEach((path, index) => {
-      const start = positions[index];
-      const end = positions[index + 1];
-
-      // Recalculate artistic curve
-      const dx = end.x - start.x;
-      const dy = end.y - start.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      const perpX = -dy / distance;
-      const perpY = dx / distance;
-      
-      const curveStrength = Math.min(distance * 0.15, 80);
-      const variation = (Math.random() - 0.5) * 20;
-      
-      const controlX = start.x + dx / 2 + perpX * (curveStrength + variation);
-      const controlY = start.y + dy / 2 + perpY * (curveStrength + variation);
-
-      const pathData = `M ${start.x} ${start.y} Q ${controlX} ${controlY} ${end.x} ${end.y}`;
-      path.setAttribute("d", pathData);
-    });
-
-    updateRoadSvgSize();
-  }
-
-  /**
-   * Update SVG dimensions to match map container
-   */
-  function updateRoadSvgSize() {
-    const containerWidth = mapElement.offsetWidth;
-    const containerHeight = mapElement.offsetHeight;
-    
-    roadSvg.setAttribute("width", containerWidth);
-    roadSvg.setAttribute("height", containerHeight);
-    roadSvg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
-  }
-
-  /**
-   * Initialize SVG filters for watercolor-style effects
-   */
-  function initSvgFilters() {
-    // Clear existing defs
-    const existingDefs = roadSvg.querySelector('defs');
-    if (existingDefs) {
-      existingDefs.remove();
-    }
-
-    // Create defs with filters
-    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    
-    // Shadow filter for subtle depth
-    const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-    filter.setAttribute("id", "road-shadow");
-    filter.setAttribute("x", "-50%");
-    filter.setAttribute("y", "-50%");
-    filter.setAttribute("width", "200%");
-    filter.setAttribute("height", "200%");
-    
-    const feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
-    feGaussianBlur.setAttribute("in", "SourceAlpha");
-    feGaussianBlur.setAttribute("stdDeviation", "2");
-    feGaussianBlur.setAttribute("result", "blur");
-    
-    const feOffset = document.createElementNS("http://www.w3.org/2000/svg", "feOffset");
-    feOffset.setAttribute("in", "blur");
-    feOffset.setAttribute("dx", "0");
-    feOffset.setAttribute("dy", "2");
-    feOffset.setAttribute("result", "offsetBlur");
-    
-    const feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
-    feFlood.setAttribute("flood-color", "#000000");
-    feFlood.setAttribute("flood-opacity", "0.3");
-    feFlood.setAttribute("result", "shadowColor");
-    
-    const feComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
-    feComposite.setAttribute("in", "shadowColor");
-    feComposite.setAttribute("in2", "offsetBlur");
-    feComposite.setAttribute("operator", "in");
-    feComposite.setAttribute("result", "shadowBlur");
-    
-    const feMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
-    const feMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
-    feMergeNode1.setAttribute("in", "shadowBlur");
-    const feMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
-    feMergeNode2.setAttribute("in", "SourceGraphic");
-    
-    feMerge.appendChild(feMergeNode1);
-    feMerge.appendChild(feMergeNode2);
-    
-    filter.appendChild(feGaussianBlur);
-    filter.appendChild(feOffset);
-    filter.appendChild(feFlood);
-    filter.appendChild(feComposite);
-    filter.appendChild(feMerge);
-    
-    defs.appendChild(filter);
-    roadSvg.insertBefore(defs, roadSvg.firstChild);
   }
 
   /**
@@ -433,6 +277,88 @@
   }
 
   /**
+   * Show loading indicator
+   */
+  function showLoading() {
+    if (videoLoading) {
+      videoLoading.classList.add("active");
+    }
+  }
+
+  /**
+   * Hide loading indicator
+   */
+  function hideLoading() {
+    if (videoLoading) {
+      videoLoading.classList.remove("active");
+    }
+  }
+
+  /**
+   * Load and play video (supports both HLS .m3u8 and regular MP4)
+   */
+  function loadVideo(videoUrl) {
+    // Destroy previous HLS instance if exists
+    if (hls) {
+      hls.destroy();
+      hls = null;
+    }
+
+    videoPlayer.removeAttribute("controls");
+
+    const isHLS = videoUrl.includes('.m3u8');
+
+    if (isHLS) {
+      // HLS stream
+      if (Hls.isSupported()) {
+        // Use HLS.js for browsers that don't support HLS natively
+        hls = new Hls({
+          startLevel: -1, // Auto quality selection
+          capLevelToPlayerSize: true
+        });
+        
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoPlayer);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          videoPlayer.play().catch((error) => {
+            console.log("Autoplay prevented:", error);
+            videoPlayer.setAttribute("controls", "");
+            hideLoading();
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error("HLS error:", data);
+          if (data.fatal) {
+            hideLoading();
+          }
+        });
+      } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari has native HLS support
+        videoPlayer.src = videoUrl;
+        videoPlayer.play().catch((error) => {
+          console.log("Autoplay prevented:", error);
+          videoPlayer.setAttribute("controls", "");
+          hideLoading();
+        });
+      } else {
+        console.error("HLS is not supported in this browser");
+        hideLoading();
+      }
+    } else {
+      // Regular MP4
+      videoPlayer.src = videoUrl;
+      videoPlayer.load();
+      videoPlayer.play().catch((error) => {
+        console.log("Autoplay prevented:", error);
+        videoPlayer.setAttribute("controls", "");
+        hideLoading();
+      });
+    }
+  }
+
+  /**
    * Show location video when marker is clicked
    * Video fills the page overlay and always plays in landscape orientation
    */
@@ -445,17 +371,40 @@
     // Set marker as active
     setActiveMarker(index);
 
-    // Load and autoplay video without controls initially
-    videoPlayer.querySelector("source").src = location.video;
-    videoPlayer.removeAttribute("controls");
-    videoPlayer.load();
-    
-    // Auto play video (no native fullscreen, CSS handles full page display)
-    videoPlayer.play().catch((error) => {
-      // Autoplay might be blocked by browser, show controls so user can play manually
-      console.log("Autoplay prevented:", error);
-      videoPlayer.setAttribute("controls", "");
-    });
+    // Hide intro button
+    if (introVideoBtn) {
+      introVideoBtn.style.display = "none";
+    }
+
+    // Show loading indicator
+    showLoading();
+
+    // Setup video event handlers
+    // Hide loading when video has enough data to start playing (streaming)
+    videoPlayer.oncanplay = () => {
+      hideLoading();
+    };
+
+    // 'loadeddata' fires when first frame is available
+    videoPlayer.onloadeddata = () => {
+      hideLoading();
+    };
+
+    // Show loading again if video is waiting for more data (buffering)
+    videoPlayer.onwaiting = () => {
+      showLoading();
+    };
+
+    // Hide loading when video resumes playing after buffering
+    videoPlayer.onplaying = () => {
+      hideLoading();
+    };
+
+    // Also hide loading on error (to prevent stuck loading)
+    videoPlayer.onerror = () => {
+      hideLoading();
+      console.error("Video loading error");
+    };
 
     // Show controls when user taps/clicks on video
     videoPlayer.onclick = () => {
@@ -469,6 +418,72 @@
       hideInfoOverlay();
     };
 
+    // Load and play the video
+    loadVideo(location.video);
+
+    // Show the overlay
+    setTimeout(() => {
+      infoOverlay.classList.add("active");
+    }, 100);
+  }
+
+  /**
+   * Show the intro video (闪闪红心 真情照亮)
+   */
+  function showIntroVideo() {
+    if (!introVideoConfig || !introVideoConfig.video) {
+      console.error("Intro video config not found");
+      return;
+    }
+
+    // Clear any active marker
+    clearActiveMarkers();
+    currentLocationIndex = -1;
+
+    // Hide intro button
+    if (introVideoBtn) {
+      introVideoBtn.style.display = "none";
+    }
+
+    // Show loading indicator
+    showLoading();
+
+    // Setup video event handlers
+    videoPlayer.oncanplay = () => {
+      hideLoading();
+    };
+
+    videoPlayer.onloadeddata = () => {
+      hideLoading();
+    };
+
+    videoPlayer.onwaiting = () => {
+      showLoading();
+    };
+
+    videoPlayer.onplaying = () => {
+      hideLoading();
+    };
+
+    videoPlayer.onerror = () => {
+      hideLoading();
+      console.error("Intro video loading error");
+    };
+
+    videoPlayer.onclick = () => {
+      if (!videoPlayer.hasAttribute("controls")) {
+        videoPlayer.setAttribute("controls", "");
+      }
+    };
+
+    videoPlayer.onended = () => {
+      hideInfoOverlay();
+    };
+
+    // Load and play intro video from config
+    console.log("Loading intro video:", introVideoConfig.video);
+    loadVideo(introVideoConfig.video);
+
     // Show the overlay
     setTimeout(() => {
       infoOverlay.classList.add("active");
@@ -481,16 +496,36 @@
   function hideInfoOverlay() {
     infoOverlay.classList.remove("active");
     
+    // Hide loading indicator
+    hideLoading();
+    
+    // Destroy HLS instance if exists
+    if (hls) {
+      hls.destroy();
+      hls = null;
+    }
+    
     // Pause and reset video when hiding overlay
     videoPlayer.pause();
     videoPlayer.currentTime = 0;
+    videoPlayer.src = ''; // Clear video source
 
     // Clean up video event handlers
     videoPlayer.onended = null;
+    videoPlayer.oncanplay = null;
+    videoPlayer.onloadeddata = null;
+    videoPlayer.onwaiting = null;
+    videoPlayer.onplaying = null;
+    videoPlayer.onerror = null;
 
     // Reset to overview
     currentLocationIndex = -1;
     clearActiveMarkers();
+
+    // Show intro button again
+    if (introVideoBtn) {
+      introVideoBtn.style.display = "flex";
+    }
   }
 
   /**
@@ -531,7 +566,16 @@
         hideInfoOverlay();
       }
     });
+
+    // Intro video button click
+    if (introVideoBtn) {
+      introVideoBtn.addEventListener("click", () => {
+        showIntroVideo();
+      });
+    }
   }
+
+
 
   /**
    * Hide splash screen and show map
@@ -552,6 +596,11 @@
     setTimeout(() => {
       if (splashScreen && splashScreen.parentNode) {
         splashScreen.parentNode.removeChild(splashScreen);
+      }
+      // Show intro button after splash is gone
+      if (introVideoBtn && introVideoConfig) {
+        introVideoBtn.style.display = "flex";
+        updateIntroButtonPosition();
       }
     }, 800);
   }
