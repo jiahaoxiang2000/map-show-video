@@ -11,14 +11,12 @@
   const videoCloseBtn = document.querySelector(".video-close-btn");
   const videoLoading = document.querySelector(".video-loading");
   const mapElement = document.getElementById("map");
-  const introVideoBtn = document.getElementById("intro-video-btn");
   const outroVideoBtn = document.getElementById("outro-video-btn");
 
   // State
   let mapConfig = {};
   let locations = [];
   let markers = [];
-  let introVideoConfig = null;
   let outroVideoConfig = null;
   let currentLocationIndex = -1; // -1 = no location selected
   let backgroundBounds = { left: 0, top: 0, width: 0, height: 0 };
@@ -68,7 +66,6 @@
       updateBackgroundImage();
       calculateBackgroundBounds();
       updateMarkerPositions();
-      updateIntroButtonPosition();
       updateOutroButtonPosition();
     });
     
@@ -79,7 +76,6 @@
         updateBackgroundImage();
         calculateBackgroundBounds();
         updateMarkerPositions();
-        updateIntroButtonPosition();
         updateOutroButtonPosition();
       }, 200);
     });
@@ -160,11 +156,9 @@
       const data = await response.json();
       mapConfig = data.mapConfig;
       locations = data.locations;
-      introVideoConfig = data.introVideo;
       outroVideoConfig = data.outroVideo;
       initMap();
       createMarkers();
-      updateIntroButtonPosition();
       updateOutroButtonPosition();
     } catch (error) {
       console.error("Failed to load locations:", error);
@@ -221,37 +215,6 @@
       marker.style.height = `${markerHeight}px`;
       marker.style.borderRadius = `${markerHeight / 2}px`;
     });
-  }
-
-  /**
-   * Update intro button position based on background bounds
-   * Square transparent button with "花絮" text
-   */
-  function updateIntroButtonPosition() {
-    if (!introVideoBtn || !introVideoConfig) return;
-    
-    const position = introVideoConfig.positionHorizontal;
-    const pos = getActualPosition(position.x, position.y);
-    
-    // Scale button size based on background - make it square (2x larger)
-    const scaleFactor = backgroundBounds.width / mapConfig.imageWidth;
-    const baseSize = 160; // Square size (doubled from 80)
-    const baseFontSize = 22; // Label font size
-    
-    const size = baseSize * scaleFactor;
-    const fontSize = baseFontSize * scaleFactor;
-    
-    introVideoBtn.style.left = `${pos.x}px`;
-    introVideoBtn.style.top = `${pos.y}px`;
-    introVideoBtn.style.width = `${size}px`;
-    introVideoBtn.style.height = `${size}px`;
-    introVideoBtn.style.borderRadius = `${size * 0.15}px`; // Slightly rounded corners
-    
-    // Update label font size
-    const label = introVideoBtn.querySelector('.intro-label');
-    if (label) {
-      label.style.fontSize = `${fontSize}px`;
-    }
   }
 
   /**
@@ -393,10 +356,7 @@
     // Set marker as active
     setActiveMarker(index);
 
-    // Hide both buttons
-    if (introVideoBtn) {
-      introVideoBtn.style.display = "none";
-    }
+    // Hide outro button
     if (outroVideoBtn) {
       outroVideoBtn.style.display = "none";
     }
@@ -453,72 +413,6 @@
   }
 
   /**
-   * Show the intro video (花絮)
-   */
-  function showIntroVideo() {
-    if (!introVideoConfig || !introVideoConfig.video) {
-      console.error("Intro video config not found");
-      return;
-    }
-
-    // Clear any active marker
-    clearActiveMarkers();
-    currentLocationIndex = -1;
-
-    // Hide both buttons
-    if (introVideoBtn) {
-      introVideoBtn.style.display = "none";
-    }
-    if (outroVideoBtn) {
-      outroVideoBtn.style.display = "none";
-    }
-
-    // Show loading indicator
-    showLoading();
-
-    // Setup video event handlers
-    videoPlayer.oncanplay = () => {
-      hideLoading();
-    };
-
-    videoPlayer.onloadeddata = () => {
-      hideLoading();
-    };
-
-    videoPlayer.onwaiting = () => {
-      showLoading();
-    };
-
-    videoPlayer.onplaying = () => {
-      hideLoading();
-    };
-
-    videoPlayer.onerror = () => {
-      hideLoading();
-      console.error("Intro video loading error");
-    };
-
-    videoPlayer.onclick = () => {
-      if (!videoPlayer.hasAttribute("controls")) {
-        videoPlayer.setAttribute("controls", "");
-      }
-    };
-
-    videoPlayer.onended = () => {
-      hideInfoOverlay();
-    };
-
-    // Load and play intro video from config
-    console.log("Loading intro video:", introVideoConfig.video);
-    loadVideo(introVideoConfig.video);
-
-    // Show the overlay
-    setTimeout(() => {
-      infoOverlay.classList.add("active");
-    }, 100);
-  }
-
-  /**
    * Show the outro video (片尾)
    */
   function showOutroVideo() {
@@ -531,10 +425,7 @@
     clearActiveMarkers();
     currentLocationIndex = -1;
 
-    // Hide both buttons
-    if (introVideoBtn) {
-      introVideoBtn.style.display = "none";
-    }
+    // Hide outro button
     if (outroVideoBtn) {
       outroVideoBtn.style.display = "none";
     }
@@ -616,10 +507,7 @@
     currentLocationIndex = -1;
     clearActiveMarkers();
 
-    // Show both buttons again
-    if (introVideoBtn) {
-      introVideoBtn.style.display = "flex";
-    }
+    // Show outro button again
     if (outroVideoBtn) {
       outroVideoBtn.style.display = "flex";
     }
@@ -664,13 +552,6 @@
       }
     });
 
-    // Intro video button click
-    if (introVideoBtn) {
-      introVideoBtn.addEventListener("click", () => {
-        showIntroVideo();
-      });
-    }
-
     // Outro video button click
     if (outroVideoBtn) {
       outroVideoBtn.addEventListener("click", () => {
@@ -687,12 +568,6 @@
   function init() {
     loadLocations().then(() => {
       initEventListeners();
-      
-      // Show intro button immediately
-      if (introVideoBtn && introVideoConfig) {
-        introVideoBtn.style.display = "flex";
-        updateIntroButtonPosition();
-      }
 
       // Show outro button immediately
       if (outroVideoBtn && outroVideoConfig) {

@@ -216,7 +216,7 @@ body {
   background: rgba(0, 0, 0, 0.6);
   border: none;
   border-radius: 50%;
-  color: #FFD700;
+  color: #ffd700;
   cursor: pointer;
   transition: all 0.3s ease;
   pointer-events: auto;
@@ -224,7 +224,7 @@ body {
 
 .video-close-btn:hover {
   background: rgba(0, 0, 0, 0.8);
-  color: #FFC107;
+  color: #ffc107;
   transform: scale(1.1);
 }
 
@@ -256,7 +256,9 @@ body {
   z-index: 105;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 .video-loading.active {

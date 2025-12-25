@@ -5,11 +5,6 @@
     "imageWidth": 3024,
     "imageHeight": 1305
   },
-  "introVideo": {
-    "title": "花絮",
-    "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/behind-the-scenes/index.m3u8",
-    "positionHorizontal": { "x": 10, "y": 90 }
-  },
   "outroVideo": {
     "title": "片尾",
     "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/outro/index.m3u8",
@@ -17,17 +12,24 @@
   },
   "locations": [
     {
+      "id": 0,
+      "title": "花絮",
+      "description": "花絮",
+      "positionHorizontal": { "x": 10, "y": 91 },
+      "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/behind-the-scenes/index.m3u8"
+    },
+    {
       "id": 1,
       "title": "韶山供电所",
       "description": "韶山供电所，负责韶山地区的电力供应和维护工作。",
-      "positionHorizontal": { "x": 18, "y": 10 },
+      "positionHorizontal": { "x": 16, "y": 10 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/1-shaoshan-gongdiansuo/index.m3u8"
     },
     {
       "id": 2,
       "title": "韶河",
       "description": "韶河，流经韶山的主要河流，风景秀丽。",
-      "positionHorizontal": { "x": 32, "y": 18 },
+      "positionHorizontal": { "x": 30, "y": 18 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/14-shaohe/index.m3u8"
     },
     {
@@ -41,21 +43,21 @@
       "id": 4,
       "title": "毛家饭店",
       "description": "毛家饭店，以毛家菜闻名的特色餐厅，提供正宗的湘菜美食。",
-      "positionHorizontal": { "x": 32, "y": 35 },
+      "positionHorizontal": { "x": 30, "y": 35 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/3-maojia-fandian/index.m3u8"
     },
     {
       "id": 5,
       "title": "铜像广场",
       "description": "毛泽东同志铜像广场，是韶山的标志性景点。铜像高6米，基座高4.1米，象征着1893年12月26日和1949年10月1日。",
-      "positionHorizontal": { "x": 60, "y": 20 },
+      "positionHorizontal": { "x": 59, "y": 20 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/4-tongxiang-guangchang/index.m3u8"
     },
     {
       "id": 6,
       "title": "虎歇坪",
       "description": "虎歇坪，韶山著名景点，因山形似虎而得名。",
-      "positionHorizontal": { "x": 84, "y": 9 },
+      "positionHorizontal": { "x": 83, "y": 9 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/18-huxieping/index.m3u8"
     },
     {
@@ -69,28 +71,28 @@
       "id": 8,
       "title": "防空洞",
       "description": "防空洞，历史遗迹，见证了特殊年代的历史。",
-      "positionHorizontal": { "x": 95, "y": 32 },
+      "positionHorizontal": { "x": 93, "y": 32 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/17-fangkongdong/index.m3u8"
     },
     {
       "id": 9,
       "title": "瞻仰大道",
       "description": "瞻仰大道，通往毛泽东铜像广场的主要道路。",
-      "positionHorizontal": { "x": 45, "y": 49 },
+      "positionHorizontal": { "x": 43, "y": 49 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/5-zhanyang-dadao/index.m3u8"
     },
     {
       "id": 10,
       "title": "毛泽东纪念馆",
       "description": "韶山毛泽东同志纪念馆，是全面展示毛泽东生平事迹、思想和人格风范的重要场所。",
-      "positionHorizontal": { "x": 68, "y": 51 },
+      "positionHorizontal": { "x": 68, "y": 50 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/19-maozedong-jinian/index.m3u8"
     },
     {
       "id": 11,
       "title": "滴水洞",
       "description": "韶山滴水洞，位于韶山冲西边的角落，与主席故居相距3公里。滴水洞天，是韶山风景中一个著名的景点。",
-      "positionHorizontal": { "x": 82, "y": 45 },
+      "positionHorizontal": { "x": 80, "y": 45 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/15-dishuidong-menkou/index.m3u8"
     },
     {
@@ -111,14 +113,14 @@
       "id": 14,
       "title": "南岸私塾",
       "description": "南岸私塾，毛泽东少年时期曾在此读书学习的地方。",
-      "positionHorizontal": { "x": 68, "y": 70 },
+      "positionHorizontal": { "x": 68, "y": 69 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/8-nanan-sishu/index.m3u8"
     },
     {
       "id": 15,
       "title": "韶山学校",
       "description": "韶山学校，韶山地区的重要教育机构。",
-      "positionHorizontal": { "x": 90, "y": 73 },
+      "positionHorizontal": { "x": 90, "y": 72 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/13-shaoshan-xuexiao/index.m3u8"
     },
     {
@@ -139,7 +141,7 @@
       "id": 18,
       "title": "南岸池",
       "description": "南岸池，位于毛泽东故居南侧的池塘，风景优美。",
-      "positionHorizontal": { "x": 63, "y": 83 },
+      "positionHorizontal": { "x": 63, "y": 82 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/7-nanan-tang/index.m3u8"
     },
     {
