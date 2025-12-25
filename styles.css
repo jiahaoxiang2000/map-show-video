@@ -204,19 +204,19 @@ body {
 /* Close/Back button - larger and more visible */
 .video-close-btn {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 2vh;
+  left: 2vw;
   z-index: 110;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 12vmin;
+  height: 12vmin;
   padding: 0;
   background: rgba(0, 0, 0, 0.6);
   border: none;
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.9);
+  color: #FFD700;
   cursor: pointer;
   transition: all 0.3s ease;
   pointer-events: auto;
@@ -224,7 +224,7 @@ body {
 
 .video-close-btn:hover {
   background: rgba(0, 0, 0, 0.8);
-  color: white;
+  color: #FFC107;
   transform: scale(1.1);
 }
 
@@ -233,8 +233,8 @@ body {
 }
 
 .video-close-btn svg {
-  width: 32px;
-  height: 32px;
+  width: 6vmin;
+  height: 6vmin;
   stroke-width: 2.5;
 }
 
