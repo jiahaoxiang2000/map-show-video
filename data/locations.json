@@ -2,20 +2,25 @@
   "mapConfig": {
     "backgroundImageHorizontal": "assets/h-background.webp",
     "backgroundImageVertical": "assets/v-background.webp",
-    "imageWidth": 1820,
-    "imageHeight": 780
+    "imageWidth": 3024,
+    "imageHeight": 1305
   },
   "introVideo": {
-    "title": "闪闪红心 真情照亮",
-    "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/20-shanshan-hongxin/index.m3u8",
+    "title": "花絮",
+    "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/behind-the-scenes/index.m3u8",
     "positionHorizontal": { "x": 10, "y": 90 }
+  },
+  "outroVideo": {
+    "title": "片尾",
+    "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/outro/index.m3u8",
+    "positionHorizontal": { "x": 88, "y": 95 }
   },
   "locations": [
     {
       "id": 1,
       "title": "韶山供电所",
       "description": "韶山供电所，负责韶山地区的电力供应和维护工作。",
-      "positionHorizontal": { "x": 20, "y": 6 },
+      "positionHorizontal": { "x": 18, "y": 10 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/1-shaoshan-gongdiansuo/index.m3u8"
     },
     {

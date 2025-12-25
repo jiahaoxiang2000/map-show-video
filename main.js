@@ -11,15 +11,15 @@
   const videoCloseBtn = document.querySelector(".video-close-btn");
   const videoLoading = document.querySelector(".video-loading");
   const mapElement = document.getElementById("map");
-  const splashScreen = document.getElementById("splash-screen");
-  const mapContainer = document.querySelector(".map-container");
   const introVideoBtn = document.getElementById("intro-video-btn");
+  const outroVideoBtn = document.getElementById("outro-video-btn");
 
   // State
   let mapConfig = {};
   let locations = [];
   let markers = [];
   let introVideoConfig = null;
+  let outroVideoConfig = null;
   let currentLocationIndex = -1; // -1 = no location selected
   let backgroundBounds = { left: 0, top: 0, width: 0, height: 0 };
   let hls = null; // HLS.js instance
@@ -69,6 +69,7 @@
       calculateBackgroundBounds();
       updateMarkerPositions();
       updateIntroButtonPosition();
+      updateOutroButtonPosition();
     });
     
     window.addEventListener('orientationchange', () => {
@@ -79,6 +80,7 @@
         calculateBackgroundBounds();
         updateMarkerPositions();
         updateIntroButtonPosition();
+        updateOutroButtonPosition();
       }, 200);
     });
   }
@@ -159,9 +161,11 @@
       mapConfig = data.mapConfig;
       locations = data.locations;
       introVideoConfig = data.introVideo;
+      outroVideoConfig = data.outroVideo;
       initMap();
       createMarkers();
       updateIntroButtonPosition();
+      updateOutroButtonPosition();
     } catch (error) {
       console.error("Failed to load locations:", error);
     }
@@ -221,6 +225,7 @@
 
   /**
    * Update intro button position based on background bounds
+   * Square transparent button with "花絮" text
    */
   function updateIntroButtonPosition() {
     if (!introVideoBtn || !introVideoConfig) return;
@@ -228,33 +233,50 @@
     const position = introVideoConfig.positionHorizontal;
     const pos = getActualPosition(position.x, position.y);
     
-    // Scale button size based on background
+    // Scale button size based on background - make it square (2x larger)
     const scaleFactor = backgroundBounds.width / mapConfig.imageWidth;
-    const basePadding = 20;
-    const baseFontSize = 16;
-    const baseMaxWidth = 400;
-    const baseMinHeight = 80;
-    const baseGap = 8;
+    const baseSize = 160; // Square size (doubled from 80)
+    const baseFontSize = 22; // Label font size
     
-    const padding = basePadding * scaleFactor;
+    const size = baseSize * scaleFactor;
     const fontSize = baseFontSize * scaleFactor;
-    const maxWidth = baseMaxWidth * scaleFactor;
-    const minHeight = baseMinHeight * scaleFactor;
-    const gap = baseGap * scaleFactor;
     
     introVideoBtn.style.left = `${pos.x}px`;
     introVideoBtn.style.top = `${pos.y}px`;
-    introVideoBtn.style.padding = `${padding}px ${padding * 1.5}px`;
-    introVideoBtn.style.fontSize = `${fontSize}px`;
-    introVideoBtn.style.borderRadius = `${padding}px`;
-    introVideoBtn.style.maxWidth = `${maxWidth}px`;
-    introVideoBtn.style.minHeight = `${minHeight}px`;
+    introVideoBtn.style.width = `${size}px`;
+    introVideoBtn.style.height = `${size}px`;
+    introVideoBtn.style.borderRadius = `${size * 0.15}px`; // Slightly rounded corners
     
-    // Update line gap
-    const span = introVideoBtn.querySelector('span');
-    if (span) {
-      span.style.gap = `${gap}px`;
+    // Update label font size
+    const label = introVideoBtn.querySelector('.intro-label');
+    if (label) {
+      label.style.fontSize = `${fontSize}px`;
     }
+  }
+
+  /**
+   * Update outro button position based on background bounds
+   * Rectangular transparent button (800x100)
+   */
+  function updateOutroButtonPosition() {
+    if (!outroVideoBtn || !outroVideoConfig) return;
+    
+    const position = outroVideoConfig.positionHorizontal;
+    const pos = getActualPosition(position.x, position.y);
+    
+    // Scale button size based on background - rectangular 800x100
+    const scaleFactor = backgroundBounds.width / mapConfig.imageWidth;
+    const baseWidth = 800;
+    const baseHeight = 100;
+    
+    const width = baseWidth * scaleFactor;
+    const height = baseHeight * scaleFactor;
+    
+    outroVideoBtn.style.left = `${pos.x}px`;
+    outroVideoBtn.style.top = `${pos.y}px`;
+    outroVideoBtn.style.width = `${width}px`;
+    outroVideoBtn.style.height = `${height}px`;
+    outroVideoBtn.style.borderRadius = `${height * 0.15}px`; // Slightly rounded corners
   }
 
   /**
@@ -371,9 +393,12 @@
     // Set marker as active
     setActiveMarker(index);
 
-    // Hide intro button
+    // Hide both buttons
     if (introVideoBtn) {
       introVideoBtn.style.display = "none";
+    }
+    if (outroVideoBtn) {
+      outroVideoBtn.style.display = "none";
     }
 
     // Show loading indicator
@@ -428,7 +453,7 @@
   }
 
   /**
-   * Show the intro video (闪闪红心 真情照亮)
+   * Show the intro video (花絮)
    */
   function showIntroVideo() {
     if (!introVideoConfig || !introVideoConfig.video) {
@@ -440,9 +465,12 @@
     clearActiveMarkers();
     currentLocationIndex = -1;
 
-    // Hide intro button
+    // Hide both buttons
     if (introVideoBtn) {
       introVideoBtn.style.display = "none";
+    }
+    if (outroVideoBtn) {
+      outroVideoBtn.style.display = "none";
     }
 
     // Show loading indicator
@@ -491,6 +519,72 @@
   }
 
   /**
+   * Show the outro video (片尾)
+   */
+  function showOutroVideo() {
+    if (!outroVideoConfig || !outroVideoConfig.video) {
+      console.error("Outro video config not found");
+      return;
+    }
+
+    // Clear any active marker
+    clearActiveMarkers();
+    currentLocationIndex = -1;
+
+    // Hide both buttons
+    if (introVideoBtn) {
+      introVideoBtn.style.display = "none";
+    }
+    if (outroVideoBtn) {
+      outroVideoBtn.style.display = "none";
+    }
+
+    // Show loading indicator
+    showLoading();
+
+    // Setup video event handlers
+    videoPlayer.oncanplay = () => {
+      hideLoading();
+    };
+
+    videoPlayer.onloadeddata = () => {
+      hideLoading();
+    };
+
+    videoPlayer.onwaiting = () => {
+      showLoading();
+    };
+
+    videoPlayer.onplaying = () => {
+      hideLoading();
+    };
+
+    videoPlayer.onerror = () => {
+      hideLoading();
+      console.error("Outro video loading error");
+    };
+
+    videoPlayer.onclick = () => {
+      if (!videoPlayer.hasAttribute("controls")) {
+        videoPlayer.setAttribute("controls", "");
+      }
+    };
+
+    videoPlayer.onended = () => {
+      hideInfoOverlay();
+    };
+
+    // Load and play outro video from config
+    console.log("Loading outro video:", outroVideoConfig.video);
+    loadVideo(outroVideoConfig.video);
+
+    // Show the overlay
+    setTimeout(() => {
+      infoOverlay.classList.add("active");
+    }, 100);
+  }
+
+  /**
    * Hide info overlay
    */
   function hideInfoOverlay() {
@@ -522,9 +616,12 @@
     currentLocationIndex = -1;
     clearActiveMarkers();
 
-    // Show intro button again
+    // Show both buttons again
     if (introVideoBtn) {
       introVideoBtn.style.display = "flex";
+    }
+    if (outroVideoBtn) {
+      outroVideoBtn.style.display = "flex";
     }
   }
 
@@ -573,37 +670,16 @@
         showIntroVideo();
       });
     }
+
+    // Outro video button click
+    if (outroVideoBtn) {
+      outroVideoBtn.addEventListener("click", () => {
+        showOutroVideo();
+      });
+    }
   }
 
 
-
-  /**
-   * Hide splash screen and show map
-   */
-  function hideSplashScreen() {
-    if (!splashScreen) return;
-
-    splashScreen.classList.add("hidden");
-
-    // Show map container after splash starts fading
-    setTimeout(() => {
-      if (mapContainer) {
-        mapContainer.style.display = "block";
-      }
-    }, 400);
-
-    // Remove splash from DOM after animation completes
-    setTimeout(() => {
-      if (splashScreen && splashScreen.parentNode) {
-        splashScreen.parentNode.removeChild(splashScreen);
-      }
-      // Show intro button after splash is gone
-      if (introVideoBtn && introVideoConfig) {
-        introVideoBtn.style.display = "flex";
-        updateIntroButtonPosition();
-      }
-    }, 800);
-  }
 
   /**
    * Initialize the application
@@ -611,10 +687,17 @@
   function init() {
     loadLocations().then(() => {
       initEventListeners();
+      
+      // Show intro button immediately
+      if (introVideoBtn && introVideoConfig) {
+        introVideoBtn.style.display = "flex";
+        updateIntroButtonPosition();
+      }
 
-      // Click anywhere on splash screen to enter main page
-      if (splashScreen) {
-        splashScreen.addEventListener("click", hideSplashScreen);
+      // Show outro button immediately
+      if (outroVideoBtn && outroVideoConfig) {
+        outroVideoBtn.style.display = "flex";
+        updateOutroButtonPosition();
       }
     });
   }

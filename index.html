@@ -7,35 +7,28 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>
-      国网韶山市供电公司：送您一张韶山全景"红色地图"，点击观看韶电青工为您讲解红色故事
+      国网韶山市供电公司：送您一张会讲解的“红色地图”，点击观看选择您想听的红色故事
     </title>
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/jpg" href="favicon.jpg" />
+    国网韶山市供电公司：送您一张韶山全景"红色地图"，点击观看韶电青工为您讲解红色故事
     <link rel="stylesheet" href="styles.css" />
     <!-- Preload images for faster loading -->
-    <link rel="preload" as="image" href="assets/head-figure.webp" />
     <link rel="preload" as="image" href="assets/h-background.webp" />
     <!-- HLS.js for streaming video support -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   </head>
   <body>
-    <!-- Splash screen - shows head figure on first load -->
-    <div id="splash-screen" class="splash-screen">
-      <img class="splash-image" src="assets/head-figure.webp" alt="欢迎界面" />
-    </div>
-
     <!-- Container for the map explorer -->
-    <div class="map-container" style="display: none">
+    <div class="map-container">
       <!-- Custom background map container -->
       <div id="map" class="map-wrapper">
         <!-- Transparent clickable markers will be added here by JavaScript -->
         <!-- Special intro video button -->
-        <div id="intro-video-btn" class="intro-video-btn" style="display: none;">
-          <span>
-            <div>“闪闪红心 真情照亮”</div>
-            <div>韶山红色路线讲解</div>
-            <div>（点击景点红色标签可以观看青工视频讲解）</div>
-          </span>
+        <div id="intro-video-btn" class="intro-video-btn" style="display: none">
+          <span class="intro-label">花絮</span>
         </div>
+        <!-- Outro video button -->
+        <div id="outro-video-btn" class="outro-video-btn" style="display: none"></div>
       </div>
 
       <!-- Bottom sheet overlay for video -->
