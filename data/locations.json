@@ -36,7 +36,7 @@
       "id": 3,
       "title": "韶山村村部",
       "description": "韶山村村部，韶山村的行政管理中心。",
-      "positionHorizontal": { "x": 10, "y": 35 },
+      "positionHorizontal": { "x": 9, "y": 35 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/2-shaoshan-cunbu/index.m3u8"
     },
     {
@@ -50,7 +50,7 @@
       "id": 5,
       "title": "铜像广场",
       "description": "毛泽东同志铜像广场，是韶山的标志性景点。铜像高6米，基座高4.1米，象征着1893年12月26日和1949年10月1日。",
-      "positionHorizontal": { "x": 59, "y": 20 },
+      "positionHorizontal": { "x": 60, "y": 20 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/4-tongxiang-guangchang/index.m3u8"
     },
     {
@@ -78,14 +78,14 @@
       "id": 9,
       "title": "瞻仰大道",
       "description": "瞻仰大道，通往毛泽东铜像广场的主要道路。",
-      "positionHorizontal": { "x": 43, "y": 49 },
+      "positionHorizontal": { "x": 63, "y": 50 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/5-zhanyang-dadao/index.m3u8"
     },
     {
       "id": 10,
       "title": "毛泽东纪念馆",
       "description": "韶山毛泽东同志纪念馆，是全面展示毛泽东生平事迹、思想和人格风范的重要场所。",
-      "positionHorizontal": { "x": 68, "y": 50 },
+      "positionHorizontal": { "x": 40, "y": 48 },
       "video": "https://video-1259747411.cos.ap-guangzhou.myqcloud.com/19-maozedong-jinian/index.m3u8"
     },
     {
